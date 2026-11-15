@@ -13,3 +13,9 @@
 - [x] Implement and verify shipper-driver chat readback and trip start through the app.
 - [x] Implement and verify shipper-only OTP, incorrect-code rejection, confirmed delivery and completed-trip readback; payment status stays unchanged.
 - [ ] Verify live GPS sharing on a real driver device — requires device location permission and a moving device.
+
+# Phase 3 — First ZIP driver extras
+
+- [ ] Compare the original driver screens and integrate missing loads, trips, earnings, messages, notifications and account views.
+- [ ] Add delivery receipt download and browser permission handling where supported.
+- [ ] Verify driver navigation and saved-data readback through the app.
