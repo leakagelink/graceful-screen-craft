@@ -1,41 +1,13 @@
 // @ts-nocheck -- ported from original app; stricter project tsconfig
 import {
-  createContext,
   useContext,
   useEffect,
   useState,
   type ReactNode,
 } from 'react';
-import { AuthError, type Session, type User } from '@supabase/supabase-js';
+import { AuthError, type User } from '@supabase/supabase-js';
 import { supabase, type Profile } from '@/lib/supabase';
-
-interface AuthState {
-  user: User | null;
-  session: Session | null;
-  profile: Profile | null;
-  profileError: string | null;
-  loading: boolean;
-}
-
-interface AuthContextValue extends AuthState {
-  signUp: (
-    email: string,
-    password: string,
-    fullName: string,
-    phone: string,
-    referralCode?: string
-  ) => Promise<{ error: string | null }>;
-  signIn: (
-    email: string,
-    password: string
-  ) => Promise<{ error: string | null }>;
-  signInWithGoogle: () => Promise<{ error: string | null }>;
-  signOut: () => Promise<void>;
-  refreshProfile: () => Promise<void>;
-  loadProfile: (userId: string) => Promise<Profile | null>;
-}
-
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+import { AuthContext, type AuthContextValue, type AuthState } from './auth-state';
 
 function logAuthError(label: string, err: unknown) {
   if (err instanceof AuthError) {
