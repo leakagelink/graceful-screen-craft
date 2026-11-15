@@ -418,6 +418,14 @@ function RoleSelection({ onPick }: { onPick: (role: UserRole) => void }) {
             onClick={() => onPick('shipper')}
             accent="primary"
           />
+          <RoleCard
+            icon={<Truck className="w-7 h-7" />}
+            title="Driver / Transporter"
+            subtitle="ड्राइवर / ट्रांसपोर्टर"
+            description="Find loads, make offers and earn on every trip"
+            onClick={() => onPick('driver')}
+            accent="primary"
+          />
         </div>
 
         <p className="text-center text-primary-300/60 text-xs mt-8">
