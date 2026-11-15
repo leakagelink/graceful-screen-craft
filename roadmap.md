@@ -1,13 +1,14 @@
 # Phase 1
 
-- [ ] Connect Lovable Cloud — blocked: Cloud activation refused because the workspace has no remaining credits.
-- [ ] Set up account profiles and secure shipper, driver, and admin access — requires Cloud activation.
-- [ ] Enable and verify sign-up and sign-in — requires Cloud activation.
-- [ ] Set up persistent booking data and verify saving and reading a booking — requires Cloud activation.
+- [x] Connect Lovable Cloud.
+- [x] Set up account profiles, recorded consent and protected role enrollment; verify admin self-promotion and KYC self-approval are blocked.
+- [x] Enable email/password, Google and Lovable sign-in; add email-confirmation state and test driver signup metadata. Verify signed-in onboarding with a temporary account.
+- [x] Set up persistent booking data; verify profile save, booking creation and booking readback after reload through the app.
+- [ ] Verify Google/Lovable provider redirects and real confirmation-email delivery — requires user-owned provider interaction and inbox access.
 
 # Phase 2 — Booking to delivery
 
-- [ ] Verify booking creation and driver offers — requires Phase 1 and Cloud activation.
-- [ ] Verify offer acceptance and driver assignment — requires Phase 1 and Cloud activation.
-- [ ] Verify shipper-driver chat and trip progress — requires Phase 1 and Cloud activation.
-- [ ] Verify OTP-confirmed delivery and trip completion — requires Phase 1 and Cloud activation.
+- [ ] Implement and verify driver offers and load visibility.
+- [ ] Implement and verify offer acceptance and driver assignment.
+- [ ] Implement and verify shipper-driver chat and trip progress.
+- [ ] Implement and verify secure OTP-confirmed delivery and trip completion.
