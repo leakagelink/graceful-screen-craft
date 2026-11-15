@@ -28,3 +28,5 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- The Vahakam app is a client-only SPA mounted from src/routes/index.tsx (src/VahakamApp.tsx) with in-memory screen switching, ported from the original Bolt shipper app; keeps the original screens intact.

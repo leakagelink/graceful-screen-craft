@@ -73,15 +73,15 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --radius: 1rem;
+  --background: oklch(0.985 0.012 75);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.705 0.213 47.6);
+  --primary-foreground: oklch(0.99 0.01 75);
   --secondary: oklch(0.968 0.007 247.896);
   --secondary-foreground: oklch(0.208 0.042 265.755);
   --muted: oklch(0.968 0.007 247.896);
@@ -92,7 +92,7 @@
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.929 0.013 255.508);
   --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --ring: oklch(0.705 0.213 47.6);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -153,3 +153,128 @@
     color: var(--color-foreground);
   }
 }
+
+
+@theme {
+  --color-primary-50: oklch(0.98 0.02 70);
+  --color-primary-100: oklch(0.954 0.038 75);
+  --color-primary-200: oklch(0.901 0.076 70);
+  --color-primary-300: oklch(0.837 0.128 66);
+  --color-primary-400: oklch(0.75 0.183 55);
+  --color-primary-500: oklch(0.705 0.213 47.6);
+  --color-primary-600: oklch(0.646 0.222 41.1);
+  --color-primary-700: oklch(0.553 0.195 38.4);
+  --color-primary-800: oklch(0.47 0.157 37.3);
+  --color-primary-900: oklch(0.408 0.123 38.2);
+  --color-primary-950: oklch(0.266 0.079 36.3);
+  --color-accent-50: oklch(0.987 0.026 102);
+  --color-accent-100: oklch(0.973 0.071 103);
+  --color-accent-200: oklch(0.945 0.129 101.5);
+  --color-accent-300: oklch(0.905 0.182 98.1);
+  --color-accent-400: oklch(0.852 0.199 91.9);
+  --color-accent-500: oklch(0.795 0.184 86);
+  --color-accent-600: oklch(0.681 0.162 75.8);
+  --color-accent-700: oklch(0.554 0.135 66.4);
+  --color-accent-800: oklch(0.476 0.114 61.9);
+  --color-accent-900: oklch(0.421 0.095 57.7);
+  --color-success-500: oklch(0.627 0.194 149.2);
+  --color-success-600: oklch(0.527 0.154 150.1);
+  --color-warning-500: oklch(0.769 0.188 70.1);
+  --color-warning-600: oklch(0.666 0.179 58.3);
+  --color-error-500: oklch(0.577 0.245 27.3);
+  --color-error-600: oklch(0.505 0.213 27.5);
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Sora', 'Plus Jakarta Sans', sans-serif;
+  --shadow-glow: 0 12px 32px -12px oklch(0.705 0.213 47.6 / 0.55);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: radial-gradient(1200px 600px at 100% -10%, oklch(0.954 0.038 75), transparent 60%), oklch(0.985 0.012 75);
+  background-attachment: fixed;
+  color: oklch(0.208 0.042 265.8);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.25s ease-out both;
+}
+
+@keyframes splashProgress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.splash-progress {
+  animation: splashProgress 1.4s ease-in-out infinite;
+}
+
+/* Smooth tap highlight removal */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe area insets for notch/status bar on mobile */
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Hide number input spinners */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
