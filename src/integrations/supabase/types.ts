@@ -451,8 +451,12 @@ export type Database = {
           rc_url: string | null
           referral_code: string | null
           referred_by: string | null
+          service_routes: string | null
           shipper_profile_completed: boolean
+          upi_id: string | null
+          vehicle_capacity: string | null
           vehicle_number: string | null
+          vehicle_type: string | null
         }
         Insert: {
           bank_account_number?: string | null
@@ -483,8 +487,12 @@ export type Database = {
           rc_url?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          service_routes?: string | null
           shipper_profile_completed?: boolean
+          upi_id?: string | null
+          vehicle_capacity?: string | null
           vehicle_number?: string | null
+          vehicle_type?: string | null
         }
         Update: {
           bank_account_number?: string | null
@@ -515,8 +523,12 @@ export type Database = {
           rc_url?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          service_routes?: string | null
           shipper_profile_completed?: boolean
+          upi_id?: string | null
+          vehicle_capacity?: string | null
           vehicle_number?: string | null
+          vehicle_type?: string | null
         }
         Relationships: []
       }
@@ -748,6 +760,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delivery_receipt: { Args: { _booking_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
