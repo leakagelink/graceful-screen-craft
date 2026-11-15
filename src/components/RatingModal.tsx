@@ -36,11 +36,6 @@ export function RatingModal({ bookingId, rateeId, rateeName, raterId, raterRole,
       setError(err.message);
       return;
     }
-    // Also update the booking's rating column
-    const ratingUpdate = raterRole === 'shipper'
-      ? { driver_rating: rating }
-      : { shipper_rating: rating };
-    await supabase.from('bookings').update(ratingUpdate).eq('id', bookingId);
     onDone();
   }
 
