@@ -16,7 +16,7 @@ import DriverTripDetail from '@/screens/DriverTripDetail';
 import KycScreen from '@/screens/KycScreen';
 import ShipperProfileSetup from '@/screens/ShipperProfileSetup';
 import type { ShipperTab } from '@/components/ShipperBottomNav';
-import { backendConfigured, type Booking } from '@/lib/supabase';
+import type { Booking } from '@/lib/supabase';
 
 type ShipperView =
   | { name: 'dashboard' }
@@ -32,17 +32,6 @@ function AppRoutes() {
   const [driverView, setDriverView] = useState<
     { name: 'home' } | { name: 'kyc' } | { name: 'trip'; booking: Booking } | { name: 'chat'; bookingId: string }
   >({ name: 'home' });
-
-  if (!backendConfigured) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <div className="max-w-sm rounded-3xl bg-white p-8 text-center shadow-xl ring-1 ring-primary-100">
-          <h1 className="text-2xl font-bold text-slate-900">Vahakam</h1>
-          <p className="mt-3 text-slate-600">Login aur data ke liye backend abhi connect nahi hai.</p>
-        </div>
-      </div>
-    );
-  }
 
   if (loading) {
     return <FullPageLoader label="Loading Vahakam…" />;
