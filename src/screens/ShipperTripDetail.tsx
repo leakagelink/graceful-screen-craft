@@ -29,6 +29,7 @@ import { Button, Badge, Field, inputClass } from '@/components/ui';
 import { STATUS_META } from '@/components/BookingCard';
 import { RatingModal } from '@/components/RatingModal';
 import CancelReasonSheet from '@/components/CancelReasonSheet';
+import MockPaymentPanel from '@/components/MockPaymentPanel';
 
 interface OfferWithDriver extends Offer {
   driver_name?: string;
@@ -372,6 +373,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
             )}
 
             {/* Payment status card */}
+            <MockPaymentPanel bookingId={booking.id} amount={finalFare} />
             {booking.payment_status && booking.payment_status !== 'NOT_REQUIRED' && (
               <div className="bg-white rounded-2xl border border-slate-200 p-5 animate-fade-in-up">
                 <div className="flex items-center gap-2 mb-3">
