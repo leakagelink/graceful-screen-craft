@@ -241,6 +241,111 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_codes: {
+        Row: {
+          attempts: number
+          booking_id: string
+          code: string
+          expires_at: string
+          shipper_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number
+          booking_id: string
+          code: string
+          expires_at: string
+          shipper_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number
+          booking_id?: string
+          code?: string
+          expires_at?: string
+          shipper_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_codes_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disputes: {
+        Row: {
+          admin_note: string | null
+          booking_id: string
+          created_at: string
+          id: string
+          raised_by: string
+          reason: string
+          status: string
+        }
+        Insert: {
+          admin_note?: string | null
+          booking_id: string
+          created_at?: string
+          id?: string
+          raised_by: string
+          reason: string
+          status?: string
+        }
+        Update: {
+          admin_note?: string | null
+          booking_id?: string
+          created_at?: string
+          id?: string
+          raised_by?: string
+          reason?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string
+          booking_id: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          booking_id: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          booking_id?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string
@@ -267,6 +372,54 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      offers: {
+        Row: {
+          booking_id: string
+          counter_amount: number | null
+          created_at: string
+          driver_id: string
+          id: string
+          offer_amount: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          counter_amount?: number | null
+          created_at?: string
+          driver_id: string
+          id?: string
+          offer_amount: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          counter_amount?: number | null
+          created_at?: string
+          driver_id?: string
+          id?: string
+          offer_amount?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -603,6 +756,26 @@ export type Database = {
         Returns: boolean
       }
       initialize_account: { Args: { _role: string }; Returns: undefined }
+      trip_action: {
+        Args: {
+          _action: string
+          _amount?: number
+          _booking_id: string
+          _offer_id?: string
+          _otp?: string
+          _reason?: string
+        }
+        Returns: Json
+      }
+      trip_contact: {
+        Args: { _booking_id: string; _person_id: string }
+        Returns: {
+          full_name: string
+          id: string
+          phone: string
+          vehicle_number: string
+        }[]
+      }
     }
     Enums: {
       app_role: "shipper" | "driver" | "admin"

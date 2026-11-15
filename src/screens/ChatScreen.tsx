@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, Send } from 'lucide-react';
 import { supabase, type Message } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
-import { inputClass } from '@/components/ui';
+import { Button, inputClass } from '@/components/ui';
 
 interface Props {
   bookingId: string;
@@ -16,6 +16,7 @@ export default function ChatScreen({ bookingId, onBack }: Props) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
@@ -35,7 +36,7 @@ export default function ChatScreen({ bookingId, onBack }: Props) {
     load();
 
     const channel = supabase
-      .channel(`messages:${bookingId}`)
+      .channel(`messages:${bookingId}:${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         {
@@ -67,6 +68,7 @@ export default function ChatScreen({ bookingId, onBack }: Props) {
     const body = input.trim();
     if (!body || !user || sending) return;
     setSending(true);
+    setErrorMessage('');
     setInput('');
 
     const { data, error } = await supabase
@@ -81,9 +83,10 @@ export default function ChatScreen({ bookingId, onBack }: Props) {
 
     setSending(false);
     if (!error && data) {
-      setMessages((prev) => [...prev, data as Message]);
+      setMessages((prev) => prev.some(m => m.id === data.id) ? prev : [...prev, data as Message]);
     } else {
       setInput(body);
+      setErrorMessage(error?.message ?? 'Message could not be sent.');
     }
   }
 
@@ -148,21 +151,25 @@ export default function ChatScreen({ bookingId, onBack }: Props) {
         onSubmit={handleSend}
         className="sticky bottom-0 bg-white/95 backdrop-blur border-t border-slate-200 p-3"
       >
+        {errorMessage && <p role="alert" className="text-error-600 text-sm max-w-md mx-auto mb-2">{errorMessage}</p>}
         <div className="max-w-md mx-auto flex items-center gap-2">
           <input
             className={inputClass}
             placeholder="Type a message…"
+            aria-label="Message"
+            maxLength={2000}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={sending}
           />
-          <button
+          <Button
+            aria-label="Send message"
             type="submit"
             disabled={!input.trim() || sending}
             className="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-600 text-white flex items-center justify-center disabled:opacity-50 hover:bg-primary-700 transition-colors"
           >
             <Send className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
       </form>
     </div>

@@ -27,7 +27,9 @@ import { calcCommissionFromSecondHalf, calcDriverPayout, calcPayout1, calcPayout
 import { Button, Badge, Spinner, Field, inputClass } from '@/components/ui';
 import { STATUS_META } from '@/components/BookingCard';
 import { RatingModal } from '@/components/RatingModal';
-import { useAppSettings, generateOtp } from '@/lib/settings';
+import { useAppSettings } from '@/lib/settings';
+
+import { actOnTrip } from '@/lib/trips';
 
 interface Props {
   booking: Booking;
@@ -114,11 +116,8 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
     // Fetch shipper profile for call button
     const b = bData as Booking;
     if (b?.shipper_id) {
-      const { data: spData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', b.shipper_id)
-        .maybeSingle();
+      const { data: contacts } = await supabase.rpc('trip_contact', { _booking_id: b.id, _person_id: b.shipper_id });
+      const spData = contacts?.[0];
       if (spData) setShipperProfile(spData as Profile);
     }
 
@@ -141,7 +140,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
   useEffect(() => {
     load();
     const channel = supabase
-      .channel(`booking:${initialBooking.id}`)
+      .channel(`booking:${initialBooking.id}:${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'bookings', filter: `id=eq.${initialBooking.id}` },
@@ -170,114 +169,21 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
 
   // --- Actions ---
 
-  async function acceptOffer() {
+  async function runAction(action, options = {}, success = '') {
     setBusy(true);
     setMsg(null);
-    const fare = Number(booking.total_fare);
-    const comm = calcCommissionFromSecondHalf(fare);
-    const driverTotalPayout = calcDriverPayout(fare);
-    const { error } = await supabase
-      .from('bookings')
-      .update({
-        driver_id: profile?.id,
-        status: 'assigned',
-        agreed_fare: fare,
-        assigned_at: new Date().toISOString(),
-        commission_amount: comm,
-        driver_total_payout: driverTotalPayout,
-        payout_1_status: 'pending',
-        payout_2_status: 'pending',
-        payment_status: 'MANUAL_PAYMENT',
-        payment_method: 'manual',
-      })
-      .eq('id', booking.id)
-      .in('status', ['available', 'paid', 'offer_made']);
+    const { error } = await actOnTrip(booking.id, action, options);
     setBusy(false);
-    if (error) {
-      setMsg({ type: 'error', text: 'Could not accept. Another driver may have taken it.' });
-      return;
-    }
-    setMsg({ type: 'success', text: 'Load accepted! Trip is now assigned to you.' });
-    await load();
-  }
-
-  async function submitOffer() {
-    if (myOffer <= 0) return;
-    setBusy(true);
-    setMsg(null);
-    const { error } = await supabase.from('offers').insert({
-      booking_id: booking.id,
-      driver_id: profile?.id,
-      offer_amount: myOffer,
-    });
-    setBusy(false);
-    if (error) {
-      setMsg({ type: 'error', text: 'Could not submit offer. You may already have one.' });
-      return;
-    }
+    if (error) { setMsg({ type: 'error', text: error }); return; }
     setShowOfferForm(false);
-    setMsg({ type: 'success', text: 'Offer sent! The shipper will review it.' });
+    if (success) setMsg({ type: 'success', text: success });
     await load();
   }
-
-  async function startTrip() {
-    setBusy(true);
-    setMsg(null);
-    const { error } = await supabase
-      .from('bookings')
-      .update({ status: 'in_progress' })
-      .eq('id', booking.id)
-      .eq('driver_id', profile?.id);
-    setBusy(false);
-    if (error) {
-      setMsg({ type: 'error', text: 'Could not start trip.' });
-      return;
-    }
-    await load();
-  }
-
-  async function completeTrip() {
-    setBusy(true);
-    setMsg(null);
-    const otp = generateOtp(settings.trip_otp_length);
-    const { error } = await supabase
-      .from('bookings')
-      .update({
-        status: 'otp_sent',
-        delivery_otp: otp,
-        otp_sent_at: new Date().toISOString(),
-      })
-      .eq('id', booking.id)
-      .eq('driver_id', profile?.id);
-    setBusy(false);
-    if (error) {
-      setMsg({ type: 'error', text: 'Could not complete trip.' });
-      return;
-    }
-    setMsg({ type: 'success', text: `Delivery OTP generated: ${otp}. Share it with the shipper to verify delivery.` });
-    await load();
-  }
-
-  async function verifyOtp() {
-    if (otpInput.trim().length !== settings.trip_otp_length || otpInput.trim() !== booking.delivery_otp) {
-      setMsg({ type: 'error', text: `Incorrect OTP. Please ask the shipper for the correct ${settings.trip_otp_length}-digit code.` });
-      return;
-    }
-    setBusy(true);
-    setMsg(null);
-    const { error } = await supabase
-      .from('bookings')
-      .update({ status: 'delivered' })
-      .eq('id', booking.id)
-      .eq('driver_id', profile?.id);
-    setBusy(false);
-    if (error) {
-      setMsg({ type: 'error', text: 'Could not verify OTP.' });
-      return;
-    }
-    setMsg({ type: 'success', text: 'Delivery verified! Processing your payment…' });
-    await load();
-  }
+  async function acceptOffer() { await runAction('take', {}, 'Load accepted! Trip assigned to you.'); }
+  async function submitOffer() { await runAction('offer', { amount: myOffer }, 'Offer sent to the shipper.'); }
+  async function startTrip() { await runAction('start'); }
+  async function completeTrip() { await runAction('request_delivery', {}, 'Delivery code is ready on the shipper’s Load Details page. Ask them after delivery.'); }
+  async function verifyOtp() { await runAction('verify_delivery', { otp: otpInput.trim() }, 'Delivery verified. Trip completed; payment status is unchanged.'); }
 
   const myOfferRow = offers.find((o) => o.driver_id === profile?.id);
   const hasMyOffer = !!myOfferRow;
@@ -356,23 +262,26 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
         </div>
 
         {/* My offer status */}
-        {hasMyOffer && !isAssigned && (
+        {myOfferRow && !isAssigned && (
           <div className="bg-white rounded-2xl border border-slate-200 p-4 animate-fade-in-up">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-slate-400">Your offer</p>
-                <p className="text-xl font-bold text-slate-900">{formatCurrency(Number(myOfferRow!.offer_amount))}</p>
+                <p className="text-xl font-bold text-slate-900">{formatCurrency(Number(myOfferRow.offer_amount))}</p>
               </div>
-              <Badge color={myOfferRow!.status === 'pending' ? 'amber' : myOfferRow!.status === 'countered' ? 'blue' : myOfferRow!.status === 'accepted' ? 'green' : 'red'}>
-                {myOfferRow!.status === 'countered' && myOfferRow!.counter_amount
-                  ? `Counter: ${formatCurrency(Number(myOfferRow!.counter_amount))}`
-                  : myOfferRow!.status}
+              <Badge color={myOfferRow.status === 'pending' ? 'amber' : myOfferRow.status === 'countered' ? 'blue' : myOfferRow.status === 'accepted' ? 'green' : 'red'}>
+                {myOfferRow.status === 'countered' && myOfferRow.counter_amount
+                  ? `Counter: ${formatCurrency(Number(myOfferRow.counter_amount))}`
+                  : myOfferRow.status}
               </Badge>
             </div>
-            {myOfferRow!.status === 'countered' && myOfferRow!.counter_amount && (
+            {myOfferRow.status === 'countered' && myOfferRow.counter_amount && (
               <p className="text-xs text-slate-500 mt-2">
-                Shipper countered with {formatCurrency(Number(myOfferRow!.counter_amount))}. Wait for shipper to accept or make a new offer.
+                Shipper countered with {formatCurrency(Number(myOfferRow.counter_amount))}.
               </p>
+            )}
+            {myOfferRow.status === 'countered' && (
+              <Button className="w-full mt-3" disabled={busy} onClick={() => runAction('accept_counter', { offerId: myOfferRow.id }, 'Counter accepted. Trip assigned.')}>Accept Counter</Button>
             )}
           </div>
         )}
@@ -396,7 +305,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
               <Button variant="primary" size="lg" onClick={acceptOffer} disabled={busy} loading={busy}>
                 <CheckCircle2 className="w-4 h-4" /> Accept Offer
               </Button>
-              <Button variant="secondary" size="lg" onClick={() => setShowOfferForm(true)} disabled={busy || hasMyOffer}>
+              <Button variant="secondary" size="lg" onClick={() => setShowOfferForm(true)} disabled={busy}>
                 <Wallet className="w-4 h-4" /> Make Offer
               </Button>
             </div>
@@ -443,7 +352,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
               <TripStep label="Load assigned" done={true} />
               <TripStep label="Trip started" done={['in_progress', 'otp_sent', 'delivered', 'completed'].includes(booking.status)} active={booking.status === 'in_progress'} />
               <TripStep label="Complete trip (OTP)" done={['otp_sent', 'delivered', 'completed'].includes(booking.status)} active={booking.status === 'otp_sent'} />
-              <TripStep label="Delivered & paid" done={booking.status === 'completed'} active={booking.status === 'delivered'} />
+              <TripStep label="Delivery confirmed" done={booking.status === 'completed'} active={booking.status === 'delivered'} />
             </div>
 
             {/* Start trip button */}
@@ -483,6 +392,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
                 <Button variant="accent" size="lg" className="w-full" onClick={verifyOtp} disabled={busy || otpInput.length !== settings.trip_otp_length} loading={busy}>
                   <CheckCircle2 className="w-5 h-5" /> Verify OTP
                 </Button>
+                <Button variant="secondary" className="w-full" disabled={busy} onClick={completeTrip}>Request new code</Button>
               </div>
             )}
 
@@ -541,7 +451,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
                 )}
                 {booking.status === 'completed' && (
                   <div className="mt-4 flex items-center gap-2 text-sm text-accent-700 bg-accent-50 rounded-lg px-3 py-2.5">
-                    <CheckCircle2 className="w-4 h-4" /> All payments received. Trip completed!
+                    <CheckCircle2 className="w-4 h-4" /> Delivery confirmed. Payment status is unchanged.
                   </div>
                 )}
               </div>
