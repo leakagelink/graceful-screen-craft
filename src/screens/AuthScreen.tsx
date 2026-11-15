@@ -22,7 +22,7 @@ type Mode = 'select' | 'policies' | 'auth';
 export default function AuthScreen() {
   const { signIn, signUp, signInWithGoogle, signInWithLovable, completeRegistration, user, profileError } = useAuth();
   const [mode, setMode] = useState<Mode>('select');
-  const [selectedRole, setSelectedRole] = useState<UserRole>('shipper');
+  const [selectedRole, setSelectedRole] = useState<'shipper' | 'driver'>('shipper');
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const [isSignUp, setIsSignUp] = useState(true);
   const [email, setEmail] = useState('');
@@ -36,6 +36,7 @@ export default function AuthScreen() {
   const submittingRef = useRef(false);
 
   function pickRole(role: UserRole) {
+    if (role === 'admin') return;
     setSelectedRole(role);
     setAcceptedPolicies(false);
     setMode('policies');

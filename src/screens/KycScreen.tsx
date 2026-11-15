@@ -36,6 +36,7 @@ export default function KycScreen({ onBack }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!profile) return;
     if (!licenseNumber.trim() || !rcNumber.trim() || !vehicleNumber.trim()) {
       setMsg({ type: 'error', text: 'Please fill in all document numbers.' });
       return;
@@ -73,7 +74,7 @@ export default function KycScreen({ onBack }: Props) {
       kyc_status: 'pending',
       kyc_submitted_at: new Date().toISOString(),
       kyc_rejection_reason: null,
-    }).eq('id', profile?.id);
+    }).eq('id', profile.id);
 
     setBusy(false);
     if (error) {
