@@ -14,12 +14,13 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import type { UserRole } from '@/lib/supabase';
+import '@lovable.dev/cloud-auth-js/styles.css';
 import { Button, Field, inputClass } from '@/components/ui';
 
 type Mode = 'select' | 'policies' | 'auth';
 
 export default function AuthScreen() {
-  const { signIn, signUp, signInWithGoogle, profileError } = useAuth();
+  const { signIn, signUp, signInWithGoogle, signInWithLovable, completeRegistration, user, profileError } = useAuth();
   const [mode, setMode] = useState<Mode>('select');
   const [selectedRole, setSelectedRole] = useState<UserRole>('shipper');
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
@@ -30,6 +31,7 @@ export default function AuthScreen() {
   const [phone, setPhone] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [confirmation, setConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const submittingRef = useRef(false);
 
@@ -42,18 +44,21 @@ export default function AuthScreen() {
 
   function continueAfterPolicies() {
     if (!acceptedPolicies) return;
+    sessionStorage.setItem('vahakam-registration-role', selectedRole);
+    sessionStorage.setItem('vahakam-policies-accepted', 'yes');
+    if (user) { void completeRegistration(selectedRole).then(result => setError(result.error)); return; }
     setMode('auth');
     setError(null);
   }
 
-  async function handleGoogle() {
+  async function handleGoogle(provider: 'google' | 'lovable' = 'google') {
     if (submittingRef.current) return;
     setError(null);
     if (isSignUp && !acceptedPolicies) return;
     submittingRef.current = true;
     setLoading(true);
     try {
-      const { error: err } = await signInWithGoogle();
+      const { error: err } = await (provider === 'google' ? signInWithGoogle() : signInWithLovable());
       if (err) {
         setError(translateError(err));
         setLoading(false);
@@ -82,10 +87,11 @@ export default function AuthScreen() {
     submittingRef.current = true;
     setLoading(true);
     try {
-      const { error: err } = isSignUp
-        ? await signUp(trimmedEmail, password, fullName.trim(), phone.trim(), referralCode.trim())
+      const result = isSignUp
+        ? await signUp(trimmedEmail, password, fullName.trim(), phone.trim(), referralCode.trim(), selectedRole)
         : await signIn(trimmedEmail, password);
-      if (err) setError(translateError(err));
+      if (result.error) setError(translateError(result.error));
+      else if ('confirmationRequired' in result && result.confirmationRequired) setConfirmation(true);
     } catch (err) {
       console.error('[auth] Unexpected error during form submit:', errorMessage(err));
       setError(translateError(errorMessage(err)));
@@ -94,6 +100,8 @@ export default function AuthScreen() {
       setLoading(false);
     }
   }
+
+  if (confirmation) return <div className="min-h-screen bg-background flex items-center justify-center p-5"><div className="max-w-md space-y-4 text-foreground"><h1 className="text-2xl font-bold">Check your email</h1><p>Open the confirmation link sent to {email} before signing in.</p><Button onClick={() => { setConfirmation(false); setIsSignUp(false); }}>Back to sign in</Button></div></div>;
 
   if (mode === 'select') {
     return <RoleSelection onPick={pickRole} />;
@@ -138,13 +146,15 @@ export default function AuthScreen() {
 
           <button
             type="button"
-            onClick={handleGoogle}
+            onClick={() => handleGoogle()}
             disabled={loading || (isSignUp && !acceptedPolicies)}
             className="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
           >
             <GoogleMark />
             Continue with Google
           </button>
+
+          <button type="button" className="lovable-auth-button w-full mt-3" disabled={loading} onClick={() => handleGoogle('lovable')}>Continue with Lovable</button>
 
           <div className="flex items-center gap-3 my-5 text-xs text-slate-400">
             <span className="flex-1 h-px bg-slate-200" />

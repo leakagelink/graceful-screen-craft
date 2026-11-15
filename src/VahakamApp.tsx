@@ -26,7 +26,7 @@ type ShipperView =
   | { name: 'chat'; bookingId: string };
 
 function AppRoutes() {
-  const { user, profile, loading, signOut } = useAuth();
+  const { user, profile, loading, registrationRequired } = useAuth();
   const [view, setView] = useState<ShipperView>({ name: 'dashboard' });
   const [tab, setTab] = useState<ShipperTab>('home');
   const [driverView, setDriverView] = useState<
@@ -37,7 +37,7 @@ function AppRoutes() {
     return <FullPageLoader label="Loading Vahakam…" />;
   }
 
-  if (!user || !profile) {
+  if (!user || !profile || registrationRequired) {
     return <AuthScreen />;
   }
 

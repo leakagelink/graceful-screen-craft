@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { AuthError, type User } from '@supabase/supabase-js';
 import { supabase, type Profile } from '@/lib/supabase';
+import { lovable } from '@/integrations/lovable';
 import { AuthContext, type AuthContextValue, type AuthState } from './auth-state';
 
 function logAuthError(label: string, err: unknown) {
@@ -39,19 +40,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile: null,
     profileError: null,
     loading: true,
+    registrationRequired: false,
   });
 
   async function fetchProfile(userId: string) {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-    if (error) {
-      console.error('[auth] Failed to load profile:', error.message);
-      return { profile: null, error: `Could not load your profile: ${error.message}` };
-    }
-    return { profile: (data as Profile | null) ?? null, error: null };
+    const [{ data, error }, { data: roles, error: roleError }, { data: consent, error: consentError }] = await Promise.all([
+      supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
+      supabase.from('user_roles').select('role').eq('user_id', userId).maybeSingle(),
+      supabase.from('consents').select('user_id').eq('user_id', userId).maybeSingle(),
+    ]);
+    const failure = error || roleError || consentError;
+    if (failure) return { profile: null, error: failure.message, registrationRequired: true };
+    return { profile: data ? { ...data, role: roles?.role ?? null } as Profile : null, error: null, registrationRequired: !roles || !consent };
   }
 
   async function loadProfile(userId: string) {
@@ -59,30 +59,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return profile;
   }
 
-  async function ensureProfile(
-    user: User
-  ): Promise<{ profile: Profile | null; error: string | null }> {
-    const existing = await fetchProfile(user.id);
-    if (existing.error || existing.profile) return existing;
-    const { error } = await supabase.from('profiles').insert({
-      id: user.id,
-      role: 'shipper',
-      full_name: displayNameFor(user),
-    });
-    if (error && error.code !== '23505') {
-      console.error('[auth] Failed to create profile:', error.message);
-      return { profile: null, error: `Could not create your profile: ${error.message}` };
-    }
-    const created = await fetchProfile(user.id);
-    if (!created.error && !created.profile) {
-      return { profile: null, error: 'Your profile could not be found after signing in.' };
-    }
-    return created;
-  }
-
   async function resolveSessionProfile(user: User | null) {
-    if (!user) return { profile: null, error: null };
-    return ensureProfile(user);
+    if (!user) return { profile: null, error: null, registrationRequired: false };
+    const pending = sessionStorage.getItem('vahakam-registration-role');
+    if (sessionStorage.getItem('vahakam-policies-accepted') === 'yes' && (pending === 'shipper' || pending === 'driver')) {
+      const { error } = await supabase.rpc('initialize_account', { _role: pending });
+      if (error) return { profile: null, error: error.message, registrationRequired: true };
+      const { error: consentError } = await supabase.from('consents').upsert({ user_id: user.id, terms_version: '2026-11' }, { onConflict: 'user_id', ignoreDuplicates: true });
+      if (consentError) return { profile: null, error: consentError.message, registrationRequired: true };
+      sessionStorage.removeItem('vahakam-policies-accepted');
+      sessionStorage.removeItem('vahakam-registration-role');
+    }
+    return fetchProfile(user.id);
   }
 
   useEffect(() => {
@@ -91,20 +79,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(async ({ data }) => {
       if (!mounted) return;
       const session = data.session;
-      const { profile, error } = await resolveSessionProfile(session?.user ?? null);
+      const { profile, error, registrationRequired } = await resolveSessionProfile(session?.user ?? null);
       if (!mounted) return;
       setState({
         user: session?.user ?? null,
         session,
         profile,
         profileError: error,
+        registrationRequired,
         loading: false,
       });
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      (async () => {
-        const { profile, error } = await resolveSessionProfile(session?.user ?? null);
+      setTimeout(() => { void (async () => {
+        const { profile, error, registrationRequired } = await resolveSessionProfile(session?.user ?? null);
         if (!mounted) return;
         if (event === 'SIGNED_OUT') {
           setState({
@@ -112,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             session: null,
             profile: null,
             profileError: null,
+            registrationRequired: false,
             loading: false,
           });
         } else {
@@ -120,10 +110,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             session,
             profile,
             profileError: error,
+            registrationRequired,
+        registrationRequired,
             loading: false,
           });
         }
-      })();
+      })(); }, 0);
     });
 
     return () => {
@@ -137,29 +129,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password,
     fullName,
     phone,
-    referralCode
+    referralCode,
+    role = 'shipper'
   ) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email, password, options: {
+      emailRedirectTo: window.location.origin,
+      data: { full_name: fullName, phone, referral_code: referralCode?.trim() || null, account_type: role },
+    } });
     if (error) return { error: error.message };
-    const user = data.user;
-    if (!user) return { error: 'Sign up failed. Please try again.' };
-
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: user.id,
-      role: 'shipper',
-      full_name: fullName,
-      phone: phone || null,
-      referred_by: referralCode?.trim() || null,
-    });
-    if (profileError) {
-      return {
-        error:
-          profileError.code === '23505'
-            ? 'An account with this email already exists.'
-            : profileError.message,
-      };
-    }
-    return { error: null };
+    return { error: null, confirmationRequired: !data.session };
   };
 
   const signIn: AuthContextValue['signIn'] = async (email, password) => {
@@ -179,22 +157,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signInWithGoogle: AuthContextValue['signInWithGoogle'] = async () => {
+  async function socialSignIn(provider: 'google' | 'lovable') {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin },
-      });
-      if (error) {
-        logAuthError('Google sign-in failed', error);
-        return { error: error.message };
-      }
-      return { error: null };
+      const { error } = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
+      return { error: error?.message ?? null };
     } catch (err) {
-      logAuthError('Google sign-in threw an exception', err);
-      return { error: err instanceof Error ? err.message : 'Unexpected error while signing in with Google.' };
+      return { error: err instanceof Error ? err.message : 'Could not sign in.' };
     }
-  };
+  }
+  const signInWithGoogle = () => socialSignIn('google');
+  const signInWithLovable = () => socialSignIn('lovable');
+  async function completeRegistration(role: 'shipper' | 'driver') {
+    sessionStorage.setItem('vahakam-registration-role', role);
+    sessionStorage.setItem('vahakam-policies-accepted', 'yes');
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) return { error: error?.message ?? 'Please sign in again.' };
+    const result = await resolveSessionProfile(data.user);
+    setState(prev => ({ ...prev, profile: result.profile, profileError: result.error, registrationRequired: result.registrationRequired }));
+    return { error: result.error };
+  }
 
   const refreshProfile = async () => {
     const userId = state.user?.id;
@@ -214,6 +195,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signIn,
         signInWithGoogle,
+        signInWithLovable,
+        completeRegistration,
         signOut,
         refreshProfile,
         loadProfile,
