@@ -40,3 +40,4 @@ use the editor.
 - Read counterpart contact fields through trip_contact instead of broad profile policies; bank and document fields remain private.
 - Keep driver extras behind DriverShell and reuse the existing trip detail and chat screens so secure trip actions have one implementation.
 - Generate delivery PDFs only from the participant-scoped delivery_receipt function after recorded OTP verification; never treat delivery as proof of payment.
+- Mock checkout stores user-and-booking-scoped browser demo records only, never booking payment or payout fields; simulated results must not confer real entitlements.

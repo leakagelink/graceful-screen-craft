@@ -20,6 +20,7 @@ import { getVehicle, formatCurrency } from '@/lib/fare';
 import { calcCommissionFromSecondHalf, calcDriverPayout } from '@/lib/commission';
 import { Badge, Button, Spinner } from '@/components/ui';
 import { STATUS_META } from '@/components/BookingCard';
+import MockPaymentPanel from '@/components/MockPaymentPanel';
 
 interface Props {
   booking: Booking;
@@ -241,10 +242,9 @@ export default function BookingSummary({
           <p className="text-xs text-slate-400 mt-3">
             The driver receives 97.5% of the fare. Vahakam takes a small 5% commission only on the second half. Payment is settled directly between shipper and driver.
           </p>
-          <div className="mt-3 bg-amber-50 rounded-lg p-3 text-xs text-amber-700">
-            Payment Gateway integration point is ready — Razorpay edge function exists at /functions/v1/razorpay-order. Enable it later when you want to accept online payments.
-          </div>
         </div>
+
+        <MockPaymentPanel bookingId={booking.id} amount={Number(booking.agreed_fare ?? booking.total_fare)} />
 
         {error && (
           <div className="bg-error-500/10 border border-error-500/20 rounded-xl p-3.5 flex items-start gap-3 animate-scale-in">
