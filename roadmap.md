@@ -24,8 +24,8 @@
 
 # Phase 4 — Payments
 
-- [ ] Confirm the business registration country and payment-provider eligibility — waiting for the user's country.
-- [ ] Connect the eligible payment service after user approval; existing Razorpay code is inactive.
+- [x] Confirm business registration in India and payment-provider eligibility; built-in Stripe and Paddle are unavailable for this country/product combination.
+- [ ] Connect an external payment service after user approval; existing Razorpay code is inactive and requires a linked merchant account.
 - [ ] Implement secure payment collection and verified payment-status readback; keep delivery confirmation separate from payment.
 - [ ] Verify supported driver settlements and subscription payments with the selected service; do not imply automatic payouts without provider support.
 - [ ] Test successful, failed and cancelled payments before live activation.
