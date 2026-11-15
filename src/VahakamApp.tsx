@@ -10,9 +10,12 @@ import ShipperTripDetail from '@/screens/ShipperTripDetail';
 import ChatScreen from '@/screens/ChatScreen';
 import AdminDashboard from '@/screens/AdminDashboard';
 import ShipperShell from '@/components/ShipperShell';
+import DriverDashboard from '@/screens/DriverDashboard';
+import DriverTripDetail from '@/screens/DriverTripDetail';
+import KycScreen from '@/screens/KycScreen';
 import ShipperProfileSetup from '@/screens/ShipperProfileSetup';
 import type { ShipperTab } from '@/components/ShipperBottomNav';
-import type { Booking } from '@/lib/supabase';
+import { backendConfigured, type Booking } from '@/lib/supabase';
 
 type ShipperView =
   | { name: 'dashboard' }
@@ -25,6 +28,20 @@ function AppRoutes() {
   const { user, profile, loading, signOut } = useAuth();
   const [view, setView] = useState<ShipperView>({ name: 'dashboard' });
   const [tab, setTab] = useState<ShipperTab>('home');
+  const [driverView, setDriverView] = useState<
+    { name: 'home' } | { name: 'kyc' } | { name: 'trip'; booking: Booking } | { name: 'chat'; bookingId: string }
+  >({ name: 'home' });
+
+  if (!backendConfigured) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="max-w-sm rounded-3xl bg-white p-8 text-center shadow-xl ring-1 ring-primary-100">
+          <h1 className="text-2xl font-bold text-slate-900">Vahakam</h1>
+          <p className="mt-3 text-slate-600">Login aur data ke liye backend abhi connect nahi hai.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return <FullPageLoader label="Loading Vahakam…" />;
@@ -38,14 +55,24 @@ function AppRoutes() {
     return <AdminDashboard />;
   }
 
-  if (profile.role !== 'shipper') {
+  if (profile.role === 'driver') {
+    const home = () => setDriverView({ name: 'home' });
+    if (driverView.name === 'kyc') return <KycScreen onBack={home} />;
+    if (driverView.name === 'trip')
+      return (
+        <DriverTripDetail
+          booking={driverView.booking}
+          onBack={home}
+          onChat={(bookingId) => setDriverView({ name: 'chat', bookingId })}
+          onCompleted={home}
+        />
+      );
+    if (driverView.name === 'chat') return <ChatScreen bookingId={driverView.bookingId} onBack={home} />;
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
-        <p className="text-slate-700">This app is for shippers only. Please use the Vahakam Driver App.</p>
-        <button onClick={() => signOut()} className="font-semibold text-primary-600">
-          Sign out
-        </button>
-      </div>
+      <DriverDashboard
+        onOpenBooking={(b) => setDriverView({ name: 'trip', booking: b })}
+        onOpenKyc={() => setDriverView({ name: 'kyc' })}
+      />
     );
   }
 

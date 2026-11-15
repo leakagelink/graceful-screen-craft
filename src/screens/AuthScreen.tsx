@@ -20,7 +20,7 @@ type Mode = 'select' | 'policies' | 'auth';
 
 export default function AuthScreen() {
   const { signIn, signUp, signInWithGoogle, profileError } = useAuth();
-  const [mode, setMode] = useState<Mode>('policies');
+  const [mode, setMode] = useState<Mode>('select');
   const [selectedRole, setSelectedRole] = useState<UserRole>('shipper');
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const [isSignUp, setIsSignUp] = useState(true);
