@@ -24,7 +24,7 @@
 
 # Phase 4 — Payments
 
-- [ ] Add isolated mock checkout with success, failure, cancellation, retry and reset; verify saved demo results without changing real payment/payout records.
+- [x] Add isolated mock checkout with success, failure, cancellation, retry and reset; verified signed-in booking summary/trip flow, reload readback and mobile layout. All 18 tests pass; demo records never update real payment/payout fields.
 
 - [x] Confirm business registration in India and payment-provider eligibility; built-in Stripe and Paddle are unavailable for this country/product combination.
 - [ ] Connect an external payment service after user approval — Razorpay connection was declined; waiting for a merchant connection. Existing Razorpay code remains inactive.
