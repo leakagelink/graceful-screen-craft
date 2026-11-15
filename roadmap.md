@@ -29,3 +29,12 @@
 - [ ] Implement secure payment collection and verified payment-status readback; keep delivery confirmation separate from payment.
 - [ ] Verify supported driver settlements and subscription payments with the selected service; do not imply automatic payouts without provider support.
 - [ ] Test successful, failed and cancelled payments before live activation.
+
+# Phase 5 — Final testing and publishing
+
+- [x] Run all existing regression tests and inspect content-page metadata.
+- [x] Verify signed-in driver navigation, profile save/readback after reload, desktop/mobile layout, accessible policy documents and sign-out; no runtime errors observed.
+- [ ] Verify populated-trip receipt download — temporary account has no completed trip; requires a completed-trip participant session.
+- [x] Check backend security findings: no warning/error findings; two informational authenticated-read rules cover intentionally shared settings and plan catalog data.
+- [ ] Complete real-phone GPS/camera and real email/social sign-in checks — requires user device, inbox and provider interaction.
+- [ ] Publish after final checks and user confirmation; online payments remain blocked on the Phase 4 merchant connection.
