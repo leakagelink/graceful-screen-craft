@@ -26,7 +26,7 @@ export default function BankAccountModal({ onClose, onSaved }: Props) {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSave) return;
+    if (!canSave || !profile) return;
     setSaving(true);
     setError(null);
     const { error: err } = await supabase
@@ -37,7 +37,7 @@ export default function BankAccountModal({ onClose, onSaved }: Props) {
         bank_ifsc: ifsc.trim().toUpperCase(),
         bank_name: bankName.trim() || null,
       })
-      .eq('id', profile?.id);
+      .eq('id', profile.id);
     setSaving(false);
     if (err) {
       setError('Could not save bank details. Please try again.');

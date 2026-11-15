@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_emails: {
+        Row: {
+          email: string | null
+          id: string
+        }
+        Insert: {
+          email?: string | null
+          id: string
+        }
+        Update: {
+          email?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_emails_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      app_settings: {
+        Row: {
+          commission_rate: number
+          id: string
+          trip_otp_length: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          commission_rate?: number
+          id: string
+          trip_otp_length?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          commission_rate?: number
+          id?: string
+          trip_otp_length?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           agreed_fare: number | null
@@ -320,6 +367,44 @@ export type Database = {
         }
         Relationships: []
       }
+      ratings: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          ratee_id: string
+          rater_id: string
+          rating: number
+          review: string | null
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          ratee_id: string
+          rater_id: string
+          rating: number
+          review?: string | null
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          ratee_id?: string
+          rater_id?: string
+          rating?: number
+          review?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipper_subscriptions: {
         Row: {
           expiry_date: string
@@ -328,6 +413,7 @@ export type Database = {
           plan_id: string | null
           shipper_id: string
           start_date: string
+          updated_at: string
         }
         Insert: {
           expiry_date: string
@@ -336,6 +422,7 @@ export type Database = {
           plan_id?: string | null
           shipper_id: string
           start_date?: string
+          updated_at?: string
         }
         Update: {
           expiry_date?: string
@@ -344,6 +431,7 @@ export type Database = {
           plan_id?: string | null
           shipper_id?: string
           start_date?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -406,8 +494,10 @@ export type Database = {
           payment_method: string
           payment_reference: string
           plan_id: string | null
+          recorded_by: string | null
           shipper_id: string
           verification_status: string
+          verified_at: string | null
         }
         Insert: {
           amount_inr: number
@@ -417,8 +507,10 @@ export type Database = {
           payment_method: string
           payment_reference: string
           plan_id?: string | null
+          recorded_by?: string | null
           shipper_id: string
           verification_status?: string
+          verified_at?: string | null
         }
         Update: {
           amount_inr?: number
@@ -428,8 +520,10 @@ export type Database = {
           payment_method?: string
           payment_reference?: string
           plan_id?: string | null
+          recorded_by?: string | null
           shipper_id?: string
           verification_status?: string
+          verified_at?: string | null
         }
         Relationships: [
           {

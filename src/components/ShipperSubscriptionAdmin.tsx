@@ -37,13 +37,14 @@ export default function ShipperSubscriptionAdmin() {
 
   const load = useCallback(async () => {
     setError(null);
-    const [profilesRes, emailsRes, subsRes, plansRes] = await Promise.all([
-      supabase.from('profiles').select('id, full_name, phone, business_name').eq('role', 'shipper'),
+    const [profilesRes, emailsRes, subsRes, plansRes, rolesRes] = await Promise.all([
+      supabase.from('profiles').select('id, full_name, phone, business_name'),
       supabase.from('account_emails').select('id, email'),
       supabase.from('shipper_subscriptions').select('shipper_id, plan_id, start_date, expiry_date, is_active, is_locked'),
       supabase.from('subscription_plans').select('id, name, price_inr, duration_days, features, is_active, sort_order').order('sort_order'),
+      supabase.from('user_roles').select('user_id').eq('role', 'shipper'),
     ]);
-    const failed = profilesRes.error ?? emailsRes.error ?? subsRes.error ?? plansRes.error;
+    const failed = profilesRes.error ?? emailsRes.error ?? subsRes.error ?? plansRes.error ?? rolesRes.error;
     if (failed) {
       setError(`Could not load subscription data: ${failed.message}`);
       setLoading(false);
@@ -51,7 +52,7 @@ export default function ShipperSubscriptionAdmin() {
     }
     const emailById = new Map((emailsRes.data ?? []).map((e) => [e.id as string, e.email as string]));
     setShippers(
-      (profilesRes.data ?? []).map((p) => ({
+      (profilesRes.data ?? []).filter(p => rolesRes.data?.some(r => r.user_id === p.id)).map((p) => ({
         id: p.id as string,
         full_name: p.full_name as string | null,
         phone: p.phone as string | null,

@@ -111,7 +111,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             profile,
             profileError: error,
             registrationRequired,
-        registrationRequired,
             loading: false,
           });
         }
