@@ -21,3 +21,11 @@
 - [x] Verify driver navigation and profile saved-data readback through the app on desktop and mobile sizes.
 - [ ] Verify receipt download on a populated driver trip through the app — completed-trip test account could not be minted; requires a reachable participant session.
 - [ ] Verify camera and nearby-location permissions on a real phone — requires device permission and hardware.
+
+# Phase 4 — Payments
+
+- [ ] Confirm the business registration country and payment-provider eligibility — waiting for the user's country.
+- [ ] Connect the eligible payment service after user approval; existing Razorpay code is inactive.
+- [ ] Implement secure payment collection and verified payment-status readback; keep delivery confirmation separate from payment.
+- [ ] Verify supported driver settlements and subscription payments with the selected service; do not imply automatic payouts without provider support.
+- [ ] Test successful, failed and cancelled payments before live activation.
