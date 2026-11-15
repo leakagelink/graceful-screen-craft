@@ -31,3 +31,7 @@ use the editor.
 
 - The Vahakam app is a client-only SPA mounted from src/routes/index.tsx (src/VahakamApp.tsx) with in-memory screen switching, ported from the original Bolt shipper app; keeps the original screens intact.
 - Define the authentication context in a separate browser-safe state module so Fast Refresh cannot recreate its identity while a provider remains mounted.
+
+- Use the generated Cloud browser client through the legacy data-module re-export so all ported screens share one session.
+- Account roles live only in protected user_roles; the profile role exposed to ported screens is a read-time compatibility projection, never a writable field.
+- Require recorded policy acceptance and one-time shipper/driver enrollment before opening account screens; admin roles are assigned only through privileged operations.

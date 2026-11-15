@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import * as authState from '@/context/auth-state';
 
+vi.mock('@/integrations/lovable', () => ({ lovable: { auth: { signInWithOAuth: vi.fn() } } }));
+
 vi.mock('@/lib/supabase', () => ({
   supabase: {
     auth: {
