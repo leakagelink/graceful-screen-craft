@@ -34,6 +34,8 @@ interface OfferWithDriver extends Offer {
   driver_name?: string;
 }
 
+import { actOnTrip } from '@/lib/trips';
+
 interface Props {
   booking: Booking;
   onBack: () => void;
@@ -54,6 +56,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
   const [showCancel, setShowCancel] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [hasRated, setHasRated] = useState(false);
+  const [deliveryCode, setDeliveryCode] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const [{ data: bData }, { data: oData }] = await Promise.all([
@@ -65,24 +68,20 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
     // Fetch driver profile if assigned
     const b = bData as Booking;
     if (b?.driver_id) {
-      const { data: dData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', b.driver_id)
-        .maybeSingle();
+      const { data: contacts } = await supabase.rpc('trip_contact', { _booking_id: b.id, _person_id: b.driver_id });
+      const dData = contacts?.[0];
       if (dData) setDriverProfile(dData as Profile);
     } else {
       setDriverProfile(null);
     }
 
     if (oData && oData.length > 0) {
-      const driverIds = [...new Set(oData.map((o) => o.driver_id))];
-      const { data: drivers } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .in('id', driverIds);
+      const drivers = await Promise.all(oData.map(async o => {
+        const { data } = await supabase.rpc('trip_contact', { _booking_id: initialBooking.id, _person_id: o.driver_id });
+        return data?.[0];
+      }));
       const driverMap = new Map<string, string>();
-      (drivers as Profile[] | null)?.forEach((d) => driverMap.set(d.id, d.full_name));
+      drivers.forEach(d => { if (d) driverMap.set(d.id, d.full_name); });
 
       setOffers(
         oData.map((o) => ({
@@ -93,6 +92,9 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
     } else {
       setOffers([]);
     }
+
+    const { data: codeData } = await supabase.from('delivery_codes').select('code,expires_at').eq('booking_id', initialBooking.id).maybeSingle();
+    setDeliveryCode(codeData && new Date(codeData.expires_at) > new Date() ? codeData.code : null);
 
     // Check if shipper has already rated
     if (b?.status === 'completed' && b?.driver_id && profile?.id) {
@@ -113,7 +115,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
   useEffect(() => {
     load();
     const channel = supabase
-      .channel(`shipper-booking:${initialBooking.id}`)
+      .channel(`shipper-booking:${initialBooking.id}:${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'bookings', filter: `id=eq.${initialBooking.id}` },
@@ -124,6 +126,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
         { event: '*', schema: 'public', table: 'offers', filter: `booking_id=eq.${initialBooking.id}` },
         () => load()
       )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'delivery_codes', filter: `booking_id=eq.${initialBooking.id}` }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [initialBooking.id, load]);
@@ -145,72 +148,18 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
 
   // --- Actions ---
 
-  async function acceptDriverOffer(offer: OfferWithDriver) {
-    setBusy(true);
-    setMsg(null);
-    const fare = Number(offer.offer_amount);
-    const comm = calcCommissionFromSecondHalf(fare);
-    const driverPayout = calcDriverPayout(fare);
-    const { error } = await supabase
-      .from('bookings')
-      .update({
-        driver_id: offer.driver_id,
-        status: 'assigned',
-        agreed_fare: fare,
-        assigned_at: new Date().toISOString(),
-        commission_amount: comm,
-        driver_total_payout: driverPayout,
-        payout_1_status: 'pending',
-        payout_2_status: 'pending',
-        payment_status: 'MANUAL_PAYMENT',
-        payment_method: 'manual',
-      })
-      .eq('id', booking.id)
-      .in('status', ['available', 'paid', 'offer_made']);
-    if (error) {
-      setBusy(false);
-      setMsg({ type: 'error', text: 'Could not accept offer.' });
-      return;
-    }
-    await supabase.from('offers').update({ status: 'accepted' }).eq('id', offer.id);
-    // Reject all other offers
-    await supabase.from('offers').update({ status: 'rejected' }).eq('booking_id', booking.id).neq('id', offer.id);
+  async function runAction(action, options = {}, success = '') {
+    setBusy(true); setMsg(null);
+    const { error } = await actOnTrip(booking.id, action, options);
     setBusy(false);
-    setMsg({ type: 'success', text: 'Offer accepted! Driver assigned.' });
-    await load();
-  }
-
-  async function rejectOffer(offer: OfferWithDriver) {
-    setBusy(true);
-    setMsg(null);
-    const { error } = await supabase.from('offers').update({ status: 'rejected' }).eq('id', offer.id);
-    setBusy(false);
-    if (error) {
-      setMsg({ type: 'error', text: 'Could not reject offer.' });
-      return;
-    }
-    setMsg({ type: 'success', text: 'Offer rejected.' });
-    await load();
-  }
-
-  async function counterOffer(offer: OfferWithDriver) {
-    const amount = Number(counterAmount[offer.id]);
-    if (!amount || amount <= 0) return;
-    setBusy(true);
-    setMsg(null);
-    const { error } = await supabase
-      .from('offers')
-      .update({ status: 'countered', counter_amount: amount })
-      .eq('id', offer.id);
-    setBusy(false);
-    if (error) {
-      setMsg({ type: 'error', text: 'Could not send counter offer.' });
-      return;
-    }
+    if (error) { setMsg({ type: 'error', text: error }); return; }
     setShowCounter(null);
-    setMsg({ type: 'success', text: `Counter offer of ${formatCurrency(amount)} sent.` });
+    if (success) setMsg({ type: 'success', text: success });
     await load();
   }
+  async function acceptDriverOffer(offer: OfferWithDriver) { await runAction('accept', { offerId: offer.id }, 'Offer accepted! Driver assigned.'); }
+  async function rejectOffer(offer: OfferWithDriver) { await runAction('reject', { offerId: offer.id }, 'Offer rejected.'); }
+  async function counterOffer(offer: OfferWithDriver) { await runAction('counter', { offerId: offer.id, amount: Number(counterAmount[offer.id]) }, 'Counter offer sent.'); }
 
   async function acceptFixedFare() {
     setBusy(true);
@@ -410,14 +359,14 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
               <TripStep label="Driver assigned" done={true} />
               <TripStep label="Trip started" done={['in_progress', 'otp_sent', 'delivered', 'completed'].includes(booking.status)} active={booking.status === 'in_progress'} />
               <TripStep label="Delivery OTP" done={['otp_sent', 'delivered', 'completed'].includes(booking.status)} active={booking.status === 'otp_sent'} />
-              <TripStep label="Delivered & paid" done={booking.status === 'completed'} active={booking.status === 'delivered'} />
+              <TripStep label="Delivery confirmed" done={booking.status === 'completed'} active={booking.status === 'delivered'} />
             </div>
 
             {/* Delivery OTP display for shipper */}
-            {booking.status === 'otp_sent' && booking.delivery_otp && (
+            {booking.status === 'otp_sent' && deliveryCode && (
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-center animate-scale-in">
                 <p className="text-sm font-semibold text-amber-800 mb-2">Delivery Verification OTP</p>
-                <p className="text-4xl font-bold tracking-widest text-amber-900">{booking.delivery_otp}</p>
+                <p className="text-4xl font-bold tracking-widest text-amber-900">{deliveryCode}</p>
                 <p className="text-xs text-amber-700 mt-2">Share this code with your driver to confirm delivery.</p>
               </div>
             )}
@@ -536,11 +485,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
                 onClose={() => setShowCancel(false)}
                 onSubmit={async (reason) => {
                   setBusy(true);
-                  const { error } = await supabase.from('bookings').update({
-                    status: 'cancelled',
-                    cancel_reason: reason,
-                    cancelled_at: new Date().toISOString(),
-                  }).eq('id', booking.id).in('status', ['available', 'paid', 'offer_made']);
+                  const { error } = await actOnTrip(booking.id, 'cancel', { reason });
                   setBusy(false);
                   if (error) { setMsg({ type: 'error', text: 'Could not cancel booking.' }); return; }
                   setShowCancel(false);
