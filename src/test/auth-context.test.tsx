@@ -1,6 +1,7 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import * as authState from '@/context/auth-state';
 
 vi.mock('@/lib/supabase', () => ({
   supabase: {
@@ -22,6 +23,8 @@ describe('Authentication context', () => {
     const { rerender } = render(<AuthProvider><Consumer /></AuthProvider>);
     await waitFor(() => expect(screen.getByTestId('auth-state')).toHaveTextContent('signed-out'));
 
+    // Fast Refresh re-evaluates the changed provider, not its unchanged dependency.
+    vi.doMock('@/context/auth-state', () => authState);
     vi.resetModules();
     const refreshed = await import('@/context/AuthContext');
     function RefreshedConsumer() {
