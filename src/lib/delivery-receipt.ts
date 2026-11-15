@@ -12,11 +12,11 @@ export async function downloadDeliveryReceipt(bookingId: string) {
   doc.text('Proof of Delivery', 18, 36);
   doc.setFontSize(10);
   const rows = [
-    ['Booking', data.booking_id], ['Delivery verified', data.verified_at],
-    ['Shipper', data.shipper_name], ['Driver', data.driver_name], ['Vehicle', data.vehicle_number],
-    ['Pickup', data.pickup_location], ['Delivery', data.drop_location], ['Goods', data.material_type],
-    ['Weight (kg)', data.weight_kg], ['Agreed fare (INR)', data.fare], ['Trip date', data.trip_date],
-    ['Payment status', data.payment_status],
+    ['Booking', data['booking_id']], ['Delivery verified', data['verified_at']],
+    ['Shipper', data['shipper_name']], ['Driver', data['driver_name']], ['Vehicle', data['vehicle_number']],
+    ['Pickup', data['pickup_location']], ['Delivery', data['drop_location']], ['Goods', data['material_type']],
+    ['Weight (kg)', data['weight_kg']], ['Agreed fare (INR)', data['fare']], ['Trip date', data['trip_date']],
+    ['Payment status', data['payment_status']],
   ];
   let y = 52;
   for (const [label, value] of rows) {

@@ -8,7 +8,7 @@ export default function DriverPermissions() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState('');
   useEffect(() => {
-    setStates(s => ({ ...s, notifications: 'Notification' in window ? Notification.permission === 'default' ? 'prompt' : Notification.permission : 'unsupported', location: navigator.geolocation ? 'prompt' : 'unsupported', camera: navigator.mediaDevices?.getUserMedia ? 'prompt' : 'unsupported' }));
+    setStates(s => ({ ...s, notifications: 'Notification' in window ? Notification.permission === 'default' ? 'prompt' : Notification.permission : 'unsupported', location: 'geolocation' in navigator ? 'prompt' : 'unsupported', camera: typeof navigator.mediaDevices?.getUserMedia === 'function' ? 'prompt' : 'unsupported' }));
     for (const name of ['geolocation', 'camera'] as const) {
       navigator.permissions?.query({ name: name as PermissionName }).then(result => setStates(s => ({ ...s, [name === 'geolocation' ? 'location' : name]: result.state }))).catch(() => {});
     }
