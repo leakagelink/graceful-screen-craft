@@ -16,6 +16,8 @@
 
 # Phase 3 — First ZIP driver extras
 
-- [ ] Compare the original driver screens and integrate missing loads, trips, earnings, messages, notifications and account views.
-- [ ] Add delivery receipt download and browser permission handling where supported.
-- [ ] Verify driver navigation and saved-data readback through the app.
+- [x] Compare the original driver screens and integrate missing loads, trips, earnings, messages, notifications and account views.
+- [x] Add participant-scoped delivery receipt download and browser permission handling where supported.
+- [x] Verify driver navigation and profile saved-data readback through the app on desktop and mobile sizes.
+- [ ] Verify receipt download on a populated driver trip through the app — completed-trip test account could not be minted; requires a reachable participant session.
+- [ ] Verify camera and nearby-location permissions on a real phone — requires device permission and hardware.
