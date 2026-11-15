@@ -315,6 +315,8 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
           </div>
         )}
 
+        <MockPaymentPanel bookingId={booking.id} amount={finalFare} />
+
         {/* --- ASSIGNED: trip progress + chat --- */}
         {hasDriver && (
           <>
@@ -373,7 +375,6 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
             )}
 
             {/* Payment status card */}
-            <MockPaymentPanel bookingId={booking.id} amount={finalFare} />
             {booking.payment_status && booking.payment_status !== 'NOT_REQUIRED' && (
               <div className="bg-white rounded-2xl border border-slate-200 p-5 animate-fade-in-up">
                 <div className="flex items-center gap-2 mb-3">
