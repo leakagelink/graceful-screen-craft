@@ -424,7 +424,7 @@ function RoleSelection({ onPick }: { onPick: (role: UserRole) => void }) {
             subtitle="ड्राइवर / ट्रांसपोर्टर"
             description="Find loads, make offers and earn on every trip"
             onClick={() => onPick('driver')}
-            accent="primary"
+            accent="accent"
           />
         </div>
 
