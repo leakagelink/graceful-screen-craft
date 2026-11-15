@@ -38,3 +38,5 @@ use the editor.
 - Apply trip transitions through the authenticated trip_action database function with row locks; this makes assignment atomic and prevents client-side status or payment manipulation.
 - Store delivery codes separately with shipper-only reads and bounded verification attempts; drivers must obtain confirmation from the shipper, not from booking reads.
 - Read counterpart contact fields through trip_contact instead of broad profile policies; bank and document fields remain private.
+- Keep driver extras behind DriverShell and reuse the existing trip detail and chat screens so secure trip actions have one implementation.
+- Generate delivery PDFs only from the participant-scoped delivery_receipt function after recorded OTP verification; never treat delivery as proof of payment.

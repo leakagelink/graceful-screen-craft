@@ -11,7 +11,7 @@ import ShipperTripDetail from '@/screens/ShipperTripDetail';
 import ChatScreen from '@/screens/ChatScreen';
 import AdminDashboard from '@/screens/AdminDashboard';
 import ShipperShell from '@/components/ShipperShell';
-import DriverDashboard from '@/screens/DriverDashboard';
+import DriverShell, { type DriverTab } from '@/components/DriverShell';
 import DriverTripDetail from '@/screens/DriverTripDetail';
 import KycScreen from '@/screens/KycScreen';
 import ShipperProfileSetup from '@/screens/ShipperProfileSetup';
@@ -29,6 +29,7 @@ function AppRoutes() {
   const { user, profile, loading, registrationRequired } = useAuth();
   const [view, setView] = useState<ShipperView>({ name: 'dashboard' });
   const [tab, setTab] = useState<ShipperTab>('home');
+  const [driverTab, setDriverTab] = useState<DriverTab>('home');
   const [driverView, setDriverView] = useState<
     { name: 'home' } | { name: 'kyc' } | { name: 'trip'; booking: Booking } | { name: 'chat'; bookingId: string }
   >({ name: 'home' });
@@ -59,9 +60,12 @@ function AppRoutes() {
       );
     if (driverView.name === 'chat') return <ChatScreen bookingId={driverView.bookingId} onBack={home} />;
     return (
-      <DriverDashboard
-        onOpenBooking={(b) => setDriverView({ name: 'trip', booking: b })}
-        onOpenKyc={() => setDriverView({ name: 'kyc' })}
+      <DriverShell
+        tab={driverTab}
+        onTab={setDriverTab}
+        onTrip={(b) => setDriverView({ name: 'trip', booking: b })}
+        onKyc={() => setDriverView({ name: 'kyc' })}
+        onChat={(bookingId) => setDriverView({ name: 'chat', bookingId })}
       />
     );
   }

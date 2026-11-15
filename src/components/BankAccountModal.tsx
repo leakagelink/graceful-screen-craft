@@ -128,9 +128,8 @@ export default function BankAccountModal({ onClose, onSaved }: Props) {
           <div className="bg-primary-50 rounded-xl p-3 text-xs text-primary-700 flex items-start gap-2">
             <Banknote className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <span>
-              Your 95% trip earnings are transferred to this account via IMPS
-              when you mark a trip complete. Your details are stored securely
-              and never shared.
+              Bank details are private. Saving them does not initiate a payout;
+              transfers appear only after payment processing is enabled.
             </span>
           </div>
 
