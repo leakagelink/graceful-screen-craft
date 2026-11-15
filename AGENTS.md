@@ -35,3 +35,6 @@ use the editor.
 - Use the generated Cloud browser client through the legacy data-module re-export so all ported screens share one session.
 - Account roles live only in protected user_roles; the profile role exposed to ported screens is a read-time compatibility projection, never a writable field.
 - Require recorded policy acceptance and one-time shipper/driver enrollment before opening account screens; admin roles are assigned only through privileged operations.
+- Apply trip transitions through the authenticated trip_action database function with row locks; this makes assignment atomic and prevents client-side status or payment manipulation.
+- Store delivery codes separately with shipper-only reads and bounded verification attempts; drivers must obtain confirmation from the shipper, not from booking reads.
+- Read counterpart contact fields through trip_contact instead of broad profile policies; bank and document fields remain private.
