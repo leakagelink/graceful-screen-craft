@@ -6,9 +6,10 @@
 - [x] Set up persistent booking data; verify profile save, booking creation and booking readback after reload through the app.
 - [ ] Verify Google/Lovable provider redirects and real confirmation-email delivery — requires user-owned provider interaction and inbox access.
 
-# Phase 2 — Booking to delivery (in progress)
+# Phase 2 — Booking to delivery
 
-- [ ] Implement and verify driver offers and load visibility.
-- [ ] Implement and verify offer acceptance and driver assignment.
-- [ ] Implement and verify shipper-driver chat and trip progress.
-- [ ] Implement and verify secure OTP-confirmed delivery and trip completion.
+- [x] Implement and verify driver offers and load visibility with signed-in test accounts.
+- [x] Implement and verify offer acceptance and atomic driver assignment through the app.
+- [x] Implement and verify shipper-driver chat readback and trip start through the app.
+- [x] Implement and verify shipper-only OTP, incorrect-code rejection, confirmed delivery and completed-trip readback; payment status stays unchanged.
+- [ ] Verify live GPS sharing on a real driver device — requires device location permission and a moving device.
