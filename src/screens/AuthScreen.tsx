@@ -25,7 +25,7 @@ export default function AuthScreen() {
   const [mode, setMode] = useState<Mode>('select');
   const [selectedRole, setSelectedRole] = useState<'shipper' | 'driver'>('shipper');
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(true);
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -290,7 +290,7 @@ function PolicyAgreement({
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Before you continue</h1>
           <p className="text-sm text-slate-500 mt-2 leading-6">
-            You are joining Vahakam Transport as a {roleLabel}. Please review and accept these documents before creating your account.
+            You are joining Vahakam Transport as a {roleLabel}. Please review and accept these documents before continuing.
           </p>
 
           <div className="space-y-3 mt-6">
