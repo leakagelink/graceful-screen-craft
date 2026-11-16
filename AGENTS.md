@@ -41,3 +41,4 @@ use the editor.
 - Keep driver extras behind DriverShell and reuse the existing trip detail and chat screens so secure trip actions have one implementation.
 - Generate delivery PDFs only from the participant-scoped delivery_receipt function after recorded OTP verification; never treat delivery as proof of payment.
 - Mock checkout stores user-and-booking-scoped browser demo records only, never booking payment or payout fields; simulated results must not confer real entitlements.
+- Driver KYC submission, admin KYC review and admin payment marking go through role-checked database functions; profile/booking column grants stay locked.

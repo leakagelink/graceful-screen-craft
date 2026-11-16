@@ -19,7 +19,7 @@
 - [x] Compare the original driver screens and integrate missing loads, trips, earnings, messages, notifications and account views.
 - [x] Add participant-scoped delivery receipt download and browser permission handling where supported.
 - [x] Verify driver navigation and profile saved-data readback through the app on desktop and mobile sizes.
-- [ ] Verify receipt download on a populated driver trip through the app — completed-trip test account could not be minted; requires a reachable participant session.
+- [x] Verify receipt download on a populated driver trip through the app.
 - [ ] Verify camera and nearby-location permissions on a real phone — requires device permission and hardware.
 
 # Phase 4 — Payments
@@ -37,7 +37,8 @@
 - [x] Run all existing regression tests and inspect content-page metadata.
 - [x] Re-run all 18 tests after mock-payment changes; verify public desktop/mobile account selection and consent-gated sign-in with no browser runtime errors.
 - [x] Verify signed-in driver navigation, profile save/readback after reload, desktop/mobile layout, accessible policy documents and sign-out; no runtime errors observed.
-- [ ] Verify populated-trip receipt download — temporary account has no completed trip; requires a completed-trip participant session.
+- [x] Verify populated-trip receipt download.
+- [x] Full end-to-end recheck: booking→offer→chat→OTP delivery, agreed-fare display, admin panel roles, KYC submit/approve, admin payment marking and settings save.
 - [x] Recheck backend security findings: one warning for authenticated reads of shared app settings and one informational plan-catalog read rule; these contain app configuration rather than private account/payment data and preserve admin-only writes. No critical findings reported.
 - [ ] Complete real-phone GPS/camera and real email/social sign-in checks — requires user device, inbox and provider interaction.
 - [ ] Publish after final checks and user confirmation; online payments remain blocked on the Phase 4 merchant connection.
