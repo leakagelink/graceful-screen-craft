@@ -109,6 +109,11 @@ export default function ShipperDashboard({ variant = 'home', onNewBooking, onOpe
             </div>
           </div>
 
+          <div className="-mt-1 mb-4">
+            <Truck3D className="w-60" />
+            <p className="text-center text-sm text-primary-200 mt-2">Apna maal bhejein — sahi truck, sahi daam</p>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <Stat label={t('dash.activeBookings')} value={active.length} />
             <Stat
