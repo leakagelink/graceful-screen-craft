@@ -1,4 +1,5 @@
 // @ts-nocheck -- ported from original app; stricter project tsconfig
+import Truck3D from '@/components/Truck3D';
 import { useEffect, useState, useCallback } from 'react';
 import { Truck, LogOut, Wallet, MapPin, CheckCircle2, Clock, Building2, Gift, Copy, MessageCircle, ShieldCheck, RotateCcw, Search, SlidersHorizontal, Power } from 'lucide-react';
 import type { Booking } from '@/lib/supabase';
@@ -123,7 +124,7 @@ export default function DriverDashboard({ onOpenBooking, onOpenKyc }: Props) {
   return (
     <div className="min-h-screen bg-slate-50 pb-10">
       {/* Header */}
-      <div className="bg-gradient-to-br from-primary-700 to-primary-900 text-white">
+      <div className="hero-3d">
         <div className="max-w-md mx-auto px-4 pt-6 pb-7">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
@@ -150,8 +151,13 @@ export default function DriverDashboard({ onOpenBooking, onOpenKyc }: Props) {
             </div>
           </div>
 
+          <div className="-mt-1 mb-3">
+            <Truck3D className="w-60" />
+            <p className="text-center text-sm text-primary-200 mt-2">Aaj ka load dhoondhein, offer bhejein, kamaayein</p>
+          </div>
+
           {/* Earnings card */}
-          <div className="bg-white/10 backdrop-blur rounded-2xl p-4">
+          <div className="glass-3d rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-1">
               <Wallet className="w-4 h-4 text-accent-300" />
               <span className="text-xs text-primary-200">Your earnings</span>

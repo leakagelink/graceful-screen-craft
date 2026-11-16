@@ -1,3 +1,4 @@
+import Truck3D from '@/components/Truck3D';
 import { useEffect, useState, useCallback } from 'react';
 import { Plus, Package, LogOut, Truck, Inbox, CheckCircle2, Gift, Copy, Search } from 'lucide-react';
 import type { Booking } from '@/lib/supabase';
@@ -81,7 +82,7 @@ export default function ShipperDashboard({ variant = 'home', onNewBooking, onOpe
       {variant === 'home' ? (
       <>
       {/* Header */}
-      <div className="bg-gradient-to-br from-primary-700 to-primary-900 text-white">
+      <div className="hero-3d">
         <div className="max-w-md mx-auto px-4 pt-6 pb-7">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
@@ -106,6 +107,11 @@ export default function ShipperDashboard({ variant = 'home', onNewBooking, onOpe
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
+          </div>
+
+          <div className="-mt-1 mb-4">
+            <Truck3D className="w-60" />
+            <p className="text-center text-sm text-primary-200 mt-2">Apna maal bhejein — sahi truck, sahi daam</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -259,7 +265,7 @@ export default function ShipperDashboard({ variant = 'home', onNewBooking, onOpe
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="bg-white/10 backdrop-blur rounded-xl px-3.5 py-2.5">
+    <div className="glass-3d rounded-xl px-3.5 py-2.5">
       <p className="text-xs text-primary-200">{label}</p>
       <p className="font-bold text-lg leading-tight mt-0.5">{value}</p>
     </div>

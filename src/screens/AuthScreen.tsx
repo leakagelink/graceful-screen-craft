@@ -1,3 +1,4 @@
+import Truck3D from '@/components/Truck3D';
 import { useRef, useState } from 'react';
 import {
   Truck,
@@ -125,7 +126,7 @@ export default function AuthScreen() {
   const roleLabelHi = selectedRole === 'shipper' ? 'व्यापारी' : 'ड्रायव्हर';
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-primary-950 via-primary-900 to-primary-800">
+    <div className="min-h-screen flex flex-col hero-3d !rounded-none min-h-screen flex flex-col">
       <div className="flex-1 flex flex-col justify-center px-5 py-8 max-w-md w-full mx-auto">
         <button
           onClick={() => setMode('select')}
@@ -310,7 +311,7 @@ function PolicyAgreement({
   const roleLabel = role === 'shipper' ? 'Shipper / Merchant' : 'Driver / Transporter';
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-primary-950 via-primary-900 to-primary-800">
+    <div className="min-h-screen flex flex-col hero-3d !rounded-none min-h-screen flex flex-col">
       <div className="flex-1 flex flex-col justify-center px-5 py-8 max-w-md w-full mx-auto">
         <button
           onClick={onBack}
@@ -399,16 +400,14 @@ function PolicyLink({
 
 function RoleSelection({ onPick }: { onPick: (role: UserRole) => void }) {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-primary-950 via-primary-900 to-primary-800 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col hero-3d !rounded-none min-h-screen flex flex-col">
       {/* decorative shapes */}
       <div className="absolute -top-20 -right-16 w-64 h-64 rounded-full bg-accent-500/20 blur-3xl" />
       <div className="absolute bottom-10 -left-20 w-72 h-72 rounded-full bg-primary-500/30 blur-3xl" />
 
       <div className="flex-1 flex flex-col justify-center px-5 py-10 max-w-md w-full mx-auto relative">
         <div className="text-center mb-10 animate-fade-in-up">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 mb-4">
-            <Truck className="w-8 h-8 text-accent-400" strokeWidth={2.2} />
-          </div>
+          <Truck3D className="w-64 mb-4" />
           <h1 className="text-3xl font-bold text-white tracking-tight">
             Vahakam Transport
           </h1>
