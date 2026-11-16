@@ -34,6 +34,7 @@ export default function AuthScreen() {
   const [confirmation, setConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const submittingRef = useRef(false);
+  const [method, setMethod] = useState<'email' | 'phone'>('email');
 
   function pickRole(role: UserRole) {
     if (role === 'admin') return;
@@ -123,8 +124,19 @@ export default function AuthScreen() {
             )}
             <h1 className="text-xl font-bold text-slate-900">{roleLabel}</h1>
           </div>
-          <p className="text-sm text-slate-500 mb-6">{roleLabelHi}</p>
+          <p className="text-sm text-slate-500 mb-4">{roleLabelHi}</p>
 
+          <div className="grid grid-cols-2 gap-1 p-1 mb-5 rounded-xl bg-slate-100" role="tablist">
+            {(['email', 'phone'] as const).map((m) => (
+              <button key={m} type="button" role="tab" aria-selected={method === m}
+                onClick={() => { setMethod(m); setError(null); }}
+                className={`py-2 rounded-lg text-sm font-semibold transition ${method === m ? 'bg-white text-primary-700 shadow' : 'text-slate-500'}`}>
+                {m === 'email' ? 'Email' : 'Mobile OTP'}
+              </button>
+            ))}
+          </div>
+
+          {method === 'phone' ? <PhoneOtpForm role={selectedRole} /> : (<>
           <form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
               <Field label="Full name">
@@ -239,6 +251,7 @@ export default function AuthScreen() {
               {isSignUp ? 'Sign in' : 'Sign up'}
             </button>
           </p>
+          </>)}
         </div>
       </div>
     </div>
@@ -467,4 +480,67 @@ function translateError(msg: string): string {
   if (m.includes('invalid api key') || m.includes('no api key'))
     return `Configuration error: the server rejected the app's connection key (${msg}).`;
   return msg;
+}
+
+function PhoneOtpForm({ role }: { role: 'shipper' | 'driver' }) {
+  const [phone, setPhone] = useState('');
+  const [name, setName] = useState('');
+  const [code, setCode] = useState('');
+  const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const e164 = () => {
+    const d = phone.replace(/\D/g, '');
+    return d.length === 10 ? `+91${d}` : d.length === 12 && d.startsWith('91') ? `+${d}` : null;
+  };
+  async function send(e: React.FormEvent) {
+    e.preventDefault(); setErr(null);
+    const num = e164();
+    if (!num) { setErr('Enter a valid 10-digit Indian mobile number.'); return; }
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithOtp({ phone: num, options: { data: { account_type: role, full_name: name.trim() || undefined, phone: num } } });
+    setBusy(false);
+    if (error) setErr(/provider|sms|phone/i.test(error.message) ? 'Mobile OTP abhi chalu nahi hai. Kripya email se login karein.' : error.message);
+    else setSent(true);
+  }
+  async function verify(e: React.FormEvent) {
+    e.preventDefault(); setErr(null);
+    const num = e164();
+    if (!num || !/^\d{6}$/.test(code)) { setErr('Enter the 6-digit code.'); return; }
+    setBusy(true);
+    const { error } = await supabase.auth.verifyOtp({ phone: num, token: code, type: 'sms' });
+    setBusy(false);
+    if (error) setErr('Code galat hai ya expire ho gaya. Dobara try karein.');
+  }
+  return (
+    <form onSubmit={sent ? verify : send} className="space-y-4">
+      {!sent && (
+        <Field label="Full name (new account)">
+          <input className={inputClass} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
+        </Field>
+      )}
+      <Field label="Mobile number">
+        <div className="flex">
+          <span className="px-3 flex items-center rounded-l-xl border border-r-0 border-slate-200 bg-slate-50 text-slate-600 text-sm">+91</span>
+          <input type="tel" inputMode="numeric" maxLength={10} disabled={sent} className={`${inputClass} rounded-l-none`} placeholder="98765 43210"
+            value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))} autoComplete="tel-national" required />
+        </div>
+      </Field>
+      {sent && (
+        <Field label="OTP code">
+          <input inputMode="numeric" maxLength={6} className={`${inputClass} tracking-[0.5em] text-center text-lg`} placeholder="••••••"
+            value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} autoComplete="one-time-code" autoFocus />
+        </Field>
+      )}
+      {err && <div role="alert" className="text-sm text-error-600 bg-error-500/10 rounded-lg px-3 py-2 font-medium">{err}</div>}
+      <Button type="submit" size="lg" className="w-full" loading={busy}>
+        {sent ? 'Verify & continue' : 'Send OTP'} {!busy && <ArrowRight className="w-4 h-4" />}
+      </Button>
+      {sent && (
+        <button type="button" className="w-full text-sm font-semibold text-primary-600" onClick={() => { setSent(false); setCode(''); setErr(null); }}>
+          Change number / resend
+        </button>
+      )}
+    </form>
+  );
 }
