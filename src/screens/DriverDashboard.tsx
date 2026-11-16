@@ -1,4 +1,5 @@
 // @ts-nocheck -- ported from original app; stricter project tsconfig
+import Truck3D from '@/components/Truck3D';
 import { useEffect, useState, useCallback } from 'react';
 import { Truck, LogOut, Wallet, MapPin, CheckCircle2, Clock, Building2, Gift, Copy, MessageCircle, ShieldCheck, RotateCcw, Search, SlidersHorizontal, Power } from 'lucide-react';
 import type { Booking } from '@/lib/supabase';
@@ -123,7 +124,7 @@ export default function DriverDashboard({ onOpenBooking, onOpenKyc }: Props) {
   return (
     <div className="min-h-screen bg-slate-50 pb-10">
       {/* Header */}
-      <div className="bg-gradient-to-br from-primary-700 to-primary-900 text-white">
+      <div className="hero-3d">
         <div className="max-w-md mx-auto px-4 pt-6 pb-7">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">

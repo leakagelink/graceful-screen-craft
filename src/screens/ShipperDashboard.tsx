@@ -1,3 +1,4 @@
+import Truck3D from '@/components/Truck3D';
 import { useEffect, useState, useCallback } from 'react';
 import { Plus, Package, LogOut, Truck, Inbox, CheckCircle2, Gift, Copy, Search } from 'lucide-react';
 import type { Booking } from '@/lib/supabase';
@@ -81,7 +82,7 @@ export default function ShipperDashboard({ variant = 'home', onNewBooking, onOpe
       {variant === 'home' ? (
       <>
       {/* Header */}
-      <div className="bg-gradient-to-br from-primary-700 to-primary-900 text-white">
+      <div className="hero-3d">
         <div className="max-w-md mx-auto px-4 pt-6 pb-7">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
