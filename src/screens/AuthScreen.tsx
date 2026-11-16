@@ -146,24 +146,6 @@ export default function AuthScreen() {
           </div>
           <p className="text-sm text-slate-500 mb-6">{roleLabelHi}</p>
 
-          <button
-            type="button"
-            onClick={() => handleGoogle()}
-            disabled={loading || (isSignUp && !acceptedPolicies)}
-            className="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
-          >
-            <GoogleMark />
-            Continue with Google
-          </button>
-
-          <button type="button" className="lovable-auth-button w-full mt-3" disabled={loading} onClick={() => handleGoogle('lovable')}>Continue with Lovable</button>
-
-          <div className="flex items-center gap-3 my-5 text-xs text-slate-400">
-            <span className="flex-1 h-px bg-slate-200" />
-            or with email
-            <span className="flex-1 h-px bg-slate-200" />
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
               <Field label="Full name">
