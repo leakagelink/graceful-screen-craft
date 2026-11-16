@@ -229,8 +229,8 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
           )}
 
           <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
-            <p className="text-xs text-slate-400">Your offered fare</p>
-            <p className="text-2xl font-bold text-primary-700">{formatCurrency(Number(booking.total_fare))}</p>
+            <p className="text-xs text-slate-400">{booking.agreed_fare != null ? 'Agreed fare' : 'Your offered fare'}</p>
+            <p className="text-2xl font-bold text-primary-700">{formatCurrency(finalFare)}</p>
           </div>
         </div>
 
