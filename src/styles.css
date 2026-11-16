@@ -74,25 +74,25 @@
 
 :root {
   --radius: 1rem;
-  --background: oklch(0.985 0.012 75);
-  --foreground: oklch(0.129 0.042 264.695);
+  --background: oklch(0.975 0.012 220);
+  --foreground: oklch(0.2 0.055 255);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.705 0.213 47.6);
-  --primary-foreground: oklch(0.99 0.01 75);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --primary: oklch(0.58 0.09 215);
+  --primary-foreground: oklch(0.985 0.01 200);
+  --secondary: oklch(0.94 0.025 210);
+  --secondary-foreground: oklch(0.27 0.065 252);
+  --muted: oklch(0.95 0.015 220);
+  --muted-foreground: oklch(0.5 0.035 240);
+  --accent: oklch(0.93 0.045 185);
+  --accent-foreground: oklch(0.27 0.065 252);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.705 0.213 47.6);
+  --border: oklch(0.9 0.02 225);
+  --input: oklch(0.9 0.02 225);
+  --ring: oklch(0.58 0.09 215);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -156,36 +156,37 @@
 
 
 @theme {
-  --color-primary-50: oklch(0.98 0.02 70);
-  --color-primary-100: oklch(0.954 0.038 75);
-  --color-primary-200: oklch(0.901 0.076 70);
-  --color-primary-300: oklch(0.837 0.128 66);
-  --color-primary-400: oklch(0.75 0.183 55);
-  --color-primary-500: oklch(0.705 0.213 47.6);
-  --color-primary-600: oklch(0.646 0.222 41.1);
-  --color-primary-700: oklch(0.553 0.195 38.4);
-  --color-primary-800: oklch(0.47 0.157 37.3);
-  --color-primary-900: oklch(0.408 0.123 38.2);
-  --color-primary-950: oklch(0.266 0.079 36.3);
-  --color-accent-50: oklch(0.987 0.026 102);
-  --color-accent-100: oklch(0.973 0.071 103);
-  --color-accent-200: oklch(0.945 0.129 101.5);
-  --color-accent-300: oklch(0.905 0.182 98.1);
-  --color-accent-400: oklch(0.852 0.199 91.9);
-  --color-accent-500: oklch(0.795 0.184 86);
-  --color-accent-600: oklch(0.681 0.162 75.8);
-  --color-accent-700: oklch(0.554 0.135 66.4);
-  --color-accent-800: oklch(0.476 0.114 61.9);
-  --color-accent-900: oklch(0.421 0.095 57.7);
+  --color-primary-50: oklch(0.975 0.015 210);
+  --color-primary-100: oklch(0.94 0.035 205);
+  --color-primary-200: oklch(0.87 0.06 200);
+  --color-primary-300: oklch(0.78 0.085 198);
+  --color-primary-400: oklch(0.68 0.095 205);
+  --color-primary-500: oklch(0.58 0.09 215);
+  --color-primary-600: oklch(0.5 0.085 222);
+  --color-primary-700: oklch(0.42 0.08 235);
+  --color-primary-800: oklch(0.34 0.075 245);
+  --color-primary-900: oklch(0.27 0.065 252);
+  --color-primary-950: oklch(0.2 0.055 255);
+  --color-accent-50: oklch(0.98 0.02 185);
+  --color-accent-100: oklch(0.95 0.045 183);
+  --color-accent-200: oklch(0.91 0.07 182);
+  --color-accent-300: oklch(0.85 0.09 182);
+  --color-accent-400: oklch(0.78 0.1 183);
+  --color-accent-500: oklch(0.74 0.095 185);
+  --color-accent-600: oklch(0.63 0.09 188);
+  --color-accent-700: oklch(0.53 0.08 192);
+  --color-accent-800: oklch(0.44 0.07 195);
+  --color-accent-900: oklch(0.37 0.06 198);
   --color-success-500: oklch(0.627 0.194 149.2);
   --color-success-600: oklch(0.527 0.154 150.1);
   --color-warning-500: oklch(0.769 0.188 70.1);
   --color-warning-600: oklch(0.666 0.179 58.3);
   --color-error-500: oklch(0.577 0.245 27.3);
   --color-error-600: oklch(0.505 0.213 27.5);
-  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-display: 'Sora', 'Plus Jakarta Sans', sans-serif;
-  --shadow-glow: 0 12px 32px -12px oklch(0.705 0.213 47.6 / 0.55);
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', 'DM Sans', sans-serif;
+  --shadow-glow: 0 12px 32px -12px oklch(0.58 0.09 215 / 0.6);
+  --shadow-3d: 0 1px 0 oklch(1 0 0 / 0.9) inset, 0 2px 4px -1px oklch(0.27 0.065 252 / 0.08), 0 14px 28px -14px oklch(0.27 0.065 252 / 0.28);
 }
 
 html {
@@ -194,9 +195,9 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: radial-gradient(1200px 600px at 100% -10%, oklch(0.954 0.038 75), transparent 60%), oklch(0.985 0.012 75);
+  background: radial-gradient(900px 500px at 100% -10%, oklch(0.93 0.045 185), transparent 60%), radial-gradient(700px 500px at -10% 110%, oklch(0.94 0.035 205), transparent 60%), oklch(0.975 0.012 220);
   background-attachment: fixed;
-  color: oklch(0.208 0.042 265.8);
+  color: oklch(0.2 0.055 255);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -278,3 +279,61 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
+
+/* ---------- Ocean 3D design layer ---------- */
+.hero-3d {
+  position: relative;
+  isolation: isolate;
+  color: oklch(0.985 0.01 200);
+  background:
+    linear-gradient(180deg, oklch(0.2 0.055 255 / 0.55), oklch(0.2 0.055 255 / 0.92) 85%),
+    url('./assets/hero-road-3d.jpg') center 72% / cover no-repeat,
+    oklch(0.2 0.055 255);
+  border-bottom-left-radius: 2rem;
+  border-bottom-right-radius: 2rem;
+  box-shadow: 0 24px 48px -24px oklch(0.2 0.055 255 / 0.7);
+  overflow: hidden;
+}
+.hero-3d::before {
+  content: "";
+  position: absolute; inset: auto -20% -40% -20%; height: 70%;
+  background: radial-gradient(closest-side, oklch(0.74 0.095 185 / 0.35), transparent);
+  z-index: -1;
+}
+.truck-3d {
+  filter: drop-shadow(0 22px 18px oklch(0.1 0.04 255 / 0.6)) drop-shadow(0 0 24px oklch(0.74 0.095 185 / 0.35));
+  animation: truckFloat 4.5s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+@keyframes truckFloat {
+  0%, 100% { transform: translateY(0) rotateZ(-0.6deg); }
+  50% { transform: translateY(-10px) rotateZ(0.6deg); }
+}
+.truck-shadow {
+  width: 60%; height: 14px; margin: -10px auto 0; border-radius: 50%;
+  background: radial-gradient(closest-side, oklch(0.1 0.04 255 / 0.55), transparent);
+  animation: shadowPulse 4.5s ease-in-out infinite;
+}
+@keyframes shadowPulse { 0%,100% { transform: scaleX(1); opacity: .9 } 50% { transform: scaleX(.82); opacity: .55 } }
+.glass-3d {
+  background: linear-gradient(145deg, oklch(1 0 0 / 0.16), oklch(1 0 0 / 0.05));
+  border: 1px solid oklch(1 0 0 / 0.18);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1px 0 oklch(1 0 0 / 0.25) inset, 0 12px 24px -12px oklch(0.1 0.04 255 / 0.6);
+}
+/* Give every card depth */
+.bg-white.rounded-2xl, .bg-white.rounded-xl, .bg-card.rounded-lg, article.rounded-lg {
+  box-shadow: var(--shadow-3d);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+button.bg-white.rounded-2xl:hover, article.rounded-lg:hover { transform: translateY(-2px); }
+nav.fixed, nav[class*="fixed"] {
+  backdrop-filter: blur(14px);
+  box-shadow: 0 -10px 30px -18px oklch(0.2 0.055 255 / 0.45);
+}
+@keyframes roadDash { to { background-position: -64px 0; } }
+.road-line {
+  height: 4px; border-radius: 4px;
+  background: repeating-linear-gradient(90deg, oklch(0.78 0.1 183) 0 28px, transparent 28px 64px);
+  animation: roadDash .6s linear infinite;
+}
