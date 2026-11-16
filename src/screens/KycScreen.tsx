@@ -68,9 +68,9 @@ export default function KycScreen({ onBack }: Props) {
       _license_number: licenseNumber.trim(),
       _rc_number: rcNumber.trim(),
       _vehicle_number: vehicleNumber.trim(),
-      _license_url: licenseUrl,
-      _rc_url: rcUrl,
-      _insurance_url: insuranceUrl,
+      _license_url: licenseUrl ?? undefined,
+      _rc_url: rcUrl ?? undefined,
+      _insurance_url: insuranceUrl ?? undefined,
     });
 
     setBusy(false);
