@@ -251,12 +251,12 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
 
           <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
             <div>
-              <p className="text-xs text-slate-400">Shipper's fare</p>
-              <p className="text-2xl font-bold text-primary-700">{formatCurrency(Number(booking.total_fare))}</p>
+              <p className="text-xs text-slate-400">{booking.agreed_fare != null ? 'Agreed fare' : "Shipper's fare"}</p>
+              <p className="text-2xl font-bold text-primary-700">{formatCurrency(finalFare)}</p>
             </div>
             <div className="text-right">
               <p className="text-xs text-slate-400">Your earnings (97.5%)</p>
-              <p className="text-lg font-bold text-accent-600">{formatCurrency(calcDriverPayout(Number(booking.total_fare)))}</p>
+              <p className="text-lg font-bold text-accent-600">{formatCurrency(calcDriverPayout(finalFare))}</p>
             </div>
           </div>
         </div>
