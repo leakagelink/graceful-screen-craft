@@ -230,12 +230,9 @@ function KycReviewCard({ profile, onAction }: { profile: Profile; onAction: () =
 
   async function review(status: KycStatus, reason?: string) {
     setBusy(true);
-    await supabase.from('profiles').update({
-      kyc_status: status,
-      kyc_reviewed_at: new Date().toISOString(),
-      kyc_rejection_reason: reason ?? null,
-    }).eq('id', profile.id);
+    const { error } = await supabase.rpc('admin_review_kyc', { _driver_id: profile.id, _status: status, ...(reason ? { _reason: reason } : {}) });
     setBusy(false);
+    if (error) { alert(error.message); return; }
     onAction();
   }
 
@@ -330,14 +327,9 @@ function PaymentRow({ booking, onAction }: { booking: Booking; onAction: () => v
 
   async function verifyPayment(status: 'PAID' | 'FAILED') {
     setBusy(true);
-    await supabase.from('bookings').update({
-      payment_status: status,
-      payment_verified_by: profile?.id,
-      payment_verified_at: new Date().toISOString(),
-      payout_1_status: status === 'PAID' ? 'paid' : booking.payout_1_status,
-      payout_2_status: status === 'PAID' ? 'paid' : booking.payout_2_status,
-    }).eq('id', booking.id);
+    const { error } = await supabase.rpc('admin_set_payment_status', { _booking_id: booking.id, _status: status });
     setBusy(false);
+    if (error) { alert(error.message); return; }
     onAction();
   }
 

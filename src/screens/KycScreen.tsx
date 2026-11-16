@@ -64,17 +64,14 @@ export default function KycScreen({ onBack }: Props) {
       insuranceUrl = url;
     }
 
-    const { error } = await supabase.from('profiles').update({
-      license_number: licenseNumber.trim(),
-      rc_number: rcNumber.trim(),
-      vehicle_number: vehicleNumber.trim(),
-      license_url: licenseUrl,
-      rc_url: rcUrl,
-      insurance_url: insuranceUrl,
-      kyc_status: 'pending',
-      kyc_submitted_at: new Date().toISOString(),
-      kyc_rejection_reason: null,
-    }).eq('id', profile.id);
+    const { error } = await supabase.rpc('submit_kyc', {
+      _license_number: licenseNumber.trim(),
+      _rc_number: rcNumber.trim(),
+      _vehicle_number: vehicleNumber.trim(),
+      _license_url: licenseUrl,
+      _rc_url: rcUrl,
+      _insurance_url: insuranceUrl,
+    });
 
     setBusy(false);
     if (error) {
