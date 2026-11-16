@@ -760,6 +760,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_review_kyc: {
+        Args: { _driver_id: string; _reason?: string; _status: string }
+        Returns: undefined
+      }
+      admin_set_payment_status: {
+        Args: { _booking_id: string; _status: string }
+        Returns: undefined
+      }
       delivery_receipt: { Args: { _booking_id: string }; Returns: Json }
       has_role: {
         Args: {
@@ -769,6 +777,17 @@ export type Database = {
         Returns: boolean
       }
       initialize_account: { Args: { _role: string }; Returns: undefined }
+      submit_kyc: {
+        Args: {
+          _insurance_url: string
+          _license_number: string
+          _license_url: string
+          _rc_number: string
+          _rc_url: string
+          _vehicle_number: string
+        }
+        Returns: undefined
+      }
       trip_action: {
         Args: {
           _action: string
