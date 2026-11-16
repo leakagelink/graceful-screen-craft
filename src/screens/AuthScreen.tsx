@@ -15,13 +15,12 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import type { UserRole } from '@/lib/supabase';
-import '@lovable.dev/cloud-auth-js/styles.css';
 import { Button, Field, inputClass } from '@/components/ui';
 
 type Mode = 'select' | 'policies' | 'auth';
 
 export default function AuthScreen() {
-  const { signIn, signUp, signInWithGoogle, signInWithLovable, completeRegistration, user, profileError } = useAuth();
+  const { signIn, signUp, completeRegistration, user, profileError } = useAuth();
   const [mode, setMode] = useState<Mode>('select');
   const [selectedRole, setSelectedRole] = useState<'shipper' | 'driver'>('shipper');
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
@@ -51,26 +50,6 @@ export default function AuthScreen() {
     if (user) { void completeRegistration(selectedRole).then(result => setError(result.error)); return; }
     setMode('auth');
     setError(null);
-  }
-
-  async function handleGoogle(provider: 'google' | 'lovable' = 'google') {
-    if (submittingRef.current) return;
-    setError(null);
-    if (isSignUp && !acceptedPolicies) return;
-    submittingRef.current = true;
-    setLoading(true);
-    try {
-      const { error: err } = await (provider === 'google' ? signInWithGoogle() : signInWithLovable());
-      if (err) {
-        setError(translateError(err));
-        setLoading(false);
-        submittingRef.current = false;
-      }
-    } catch (err) {
-      setError(translateError(errorMessage(err)));
-      setLoading(false);
-      submittingRef.current = false;
-    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -145,24 +124,6 @@ export default function AuthScreen() {
             <h1 className="text-xl font-bold text-slate-900">{roleLabel}</h1>
           </div>
           <p className="text-sm text-slate-500 mb-6">{roleLabelHi}</p>
-
-          <button
-            type="button"
-            onClick={() => handleGoogle()}
-            disabled={loading || (isSignUp && !acceptedPolicies)}
-            className="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
-          >
-            <GoogleMark />
-            Continue with Google
-          </button>
-
-          <button type="button" className="lovable-auth-button w-full mt-3" disabled={loading} onClick={() => handleGoogle('lovable')}>Continue with Lovable</button>
-
-          <div className="flex items-center gap-3 my-5 text-xs text-slate-400">
-            <span className="flex-1 h-px bg-slate-200" />
-            or with email
-            <span className="flex-1 h-px bg-slate-200" />
-          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
@@ -281,17 +242,6 @@ export default function AuthScreen() {
         </div>
       </div>
     </div>
-  );
-}
-
-function GoogleMark() {
-  return (
-    <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">
-      <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.7-2.4 3.6v3h3.9c2.2-2 3.5-5 3.5-8.8z" />
-      <path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.9-3c-1.1.7-2.5 1.2-4 1.2-3.1 0-5.7-2.1-6.6-4.9H1.4v3.1C3.4 21.4 7.4 24 12 24z" />
-      <path fill="#FBBC05" d="M5.4 14.4c-.2-.7-.4-1.5-.4-2.4s.1-1.6.4-2.4V6.5H1.4C.5 8.2 0 10 0 12s.5 3.8 1.4 5.5l4-3.1z" />
-      <path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.5 1.8l3.4-3.4C17.9 1.2 15.2 0 12 0 7.4 0 3.4 2.6 1.4 6.5l4 3.1C6.3 6.9 8.9 4.8 12 4.8z" />
-    </svg>
   );
 }
 
