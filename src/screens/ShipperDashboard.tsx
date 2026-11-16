@@ -265,7 +265,7 @@ export default function ShipperDashboard({ variant = 'home', onNewBooking, onOpe
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="bg-white/10 backdrop-blur rounded-xl px-3.5 py-2.5">
+    <div className="glass-3d rounded-xl px-3.5 py-2.5">
       <p className="text-xs text-primary-200">{label}</p>
       <p className="font-bold text-lg leading-tight mt-0.5">{value}</p>
     </div>
