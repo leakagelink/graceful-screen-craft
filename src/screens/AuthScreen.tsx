@@ -126,7 +126,7 @@ export default function AuthScreen() {
   const roleLabelHi = selectedRole === 'shipper' ? 'व्यापारी' : 'ड्रायव्हर';
 
   return (
-    <div className="min-h-screen flex flex-col hero-3d !rounded-none">
+    <div className="min-h-screen flex flex-col hero-3d !rounded-none min-h-screen flex flex-col">
       <div className="flex-1 flex flex-col justify-center px-5 py-8 max-w-md w-full mx-auto">
         <button
           onClick={() => setMode('select')}
@@ -311,7 +311,7 @@ function PolicyAgreement({
   const roleLabel = role === 'shipper' ? 'Shipper / Merchant' : 'Driver / Transporter';
 
   return (
-    <div className="min-h-screen flex flex-col hero-3d !rounded-none">
+    <div className="min-h-screen flex flex-col hero-3d !rounded-none min-h-screen flex flex-col">
       <div className="flex-1 flex flex-col justify-center px-5 py-8 max-w-md w-full mx-auto">
         <button
           onClick={onBack}
@@ -400,7 +400,7 @@ function PolicyLink({
 
 function RoleSelection({ onPick }: { onPick: (role: UserRole) => void }) {
   return (
-    <div className="min-h-screen flex flex-col hero-3d !rounded-none">
+    <div className="min-h-screen flex flex-col hero-3d !rounded-none min-h-screen flex flex-col">
       {/* decorative shapes */}
       <div className="absolute -top-20 -right-16 w-64 h-64 rounded-full bg-accent-500/20 blur-3xl" />
       <div className="absolute bottom-10 -left-20 w-72 h-72 rounded-full bg-primary-500/30 blur-3xl" />

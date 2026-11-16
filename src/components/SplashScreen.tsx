@@ -19,7 +19,8 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
   return (
     <div
       aria-hidden={exiting}
-      className={`hero-3d fixed inset-0 z-50 flex flex-col items-center justify-center !rounded-none transition-opacity duration-500 ${
+      style={{ position: "fixed" }}
+      className={`hero-3d inset-0 z-50 flex flex-col items-center justify-center !rounded-none transition-opacity duration-500 ${
         exiting ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
