@@ -779,11 +779,11 @@ export type Database = {
       initialize_account: { Args: { _role: string }; Returns: undefined }
       submit_kyc: {
         Args: {
-          _insurance_url: string
+          _insurance_url?: string
           _license_number: string
-          _license_url: string
+          _license_url?: string
           _rc_number: string
-          _rc_url: string
+          _rc_url?: string
           _vehicle_number: string
         }
         Returns: undefined
