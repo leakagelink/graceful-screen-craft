@@ -40,13 +40,17 @@ export default function AdminDashboard() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: pData }, { data: bData }, { data: dData }, { data: sData }] = await Promise.all([
+    const [{ data: pData }, { data: bData }, { data: dData }, { data: sData }, { data: rData }] = await Promise.all([
       supabase.from('profiles').select('*').order('created_at', { ascending: false }),
       supabase.from('bookings').select('*').order('created_at', { ascending: false }),
       supabase.from('disputes').select('*').order('created_at', { ascending: false }),
       supabase.from('app_settings').select('*').eq('id', 'default').maybeSingle(),
+      supabase.from('user_roles').select('user_id, role'),
     ]);
-    if (pData) setProfiles(pData as Profile[]);
+    if (pData) {
+      const roleByUser = new Map((rData ?? []).map((r) => [r.user_id, r.role]));
+      setProfiles(pData.map((p) => ({ ...p, role: roleByUser.get(p.id) ?? null })) as Profile[]);
+    }
     if (bData) setBookings(bData as Booking[]);
     if (dData) setDisputes(dData as Dispute[]);
     if (sData) setAppSettings(sData as AppSettings);
