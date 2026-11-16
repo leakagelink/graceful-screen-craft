@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import type { UserRole } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { Button, Field, inputClass } from '@/components/ui';
 
 type Mode = 'select' | 'policies' | 'auth';
