@@ -10,7 +10,7 @@
  */
 
 export const COMMISSION_RATE = 0.03; // 3% of total (5% of delivery 60%)
-export const DEFAULT_SECOND_HALF_RATE = 0.05; // 5% of second half
+export const DEFAULT_SECOND_HALF_RATE = 0.05; // 5% of the delivery 60% portion
 
 export function calcCommission(totalFare: number, secondHalfRate: number = DEFAULT_SECOND_HALF_RATE): number {
   const secondHalf = totalFare - Math.round(totalFare * 0.4);

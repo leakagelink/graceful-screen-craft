@@ -55,6 +55,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
   const [shipperProfile, setShipperProfile] = useState<Profile | null>(null);
   const [tracking, setTracking] = useState(false);
   const watchIdRef = useRef<number | null>(null);
+  const ratingDismissedRef = useRef(false);
   const { settings } = useAppSettings();
 
   const isAssigned = booking.driver_id === profile?.id;
@@ -134,7 +135,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
         .eq('rater_id', profile.id)
         .maybeSingle();
       setHasRated(!!existingRating);
-      if (!existingRating) setShowRating(true);
+      if (!existingRating && !ratingDismissedRef.current) setShowRating(true);
     } else {
       setShowRating(false);
       setHasRated(false);
@@ -259,7 +260,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
               <p className="text-2xl font-bold text-primary-700">{formatCurrency(finalFare)}</p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-slate-400">Your earnings (97.5%)</p>
+              <p className="text-xs text-slate-400">Your earnings (97%)</p>
               <p className="text-lg font-bold text-accent-600">{formatCurrency(calcDriverPayout(finalFare))}</p>
             </div>
           </div>
@@ -449,13 +450,13 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
                   <PayRow label="Driver total payout (97%)" value={formatCurrency(driverTotal)} bold color="text-accent-600" />
                   <PayRow label="Pickup payment (40%, 0% commission)" value={formatCurrency(payout1)} />
                   <PayRow
-                    label="First payment status"
+                    label="Pickup 40% payment status"
                     value={booking.payout_1_status === 'paid' ? 'Paid' : booking.payout_1_status === 'failed' ? 'Failed' : 'Pending'}
                     color={booking.payout_1_status === 'paid' ? 'text-accent-600' : booking.payout_1_status === 'failed' ? 'text-error-600' : 'text-amber-600'}
                   />
                   <PayRow label="Delivery payment (60%, 5% commission)" value={formatCurrency(payout2)} />
                   <PayRow
-                    label="Second payment status"
+                    label="Delivery 60% payment status"
                     value={booking.payout_2_status === 'paid' ? 'Paid' : booking.payout_2_status === 'failed' ? 'Failed' : 'Pending'}
                     color={booking.payout_2_status === 'paid' ? 'text-accent-600' : booking.payout_2_status === 'failed' ? 'text-error-600' : 'text-amber-600'}
                   />
@@ -534,7 +535,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
           raterId={profile.id}
           raterRole="driver"
           onDone={() => { setShowRating(false); setHasRated(true); setMsg({ type: 'success', text: 'Rating submitted!' }); }}
-          onSkip={() => setShowRating(false)}
+          onSkip={() => { ratingDismissedRef.current = true; setShowRating(false); }}
         />
       )}
     </div>

@@ -1,5 +1,5 @@
 // @ts-nocheck -- ported from original app; stricter project tsconfig
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   ArrowLeft,
   Truck,
@@ -60,6 +60,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
   const [showRating, setShowRating] = useState(false);
   const [hasRated, setHasRated] = useState(false);
   const [deliveryCode, setDeliveryCode] = useState<string | null>(null);
+  const ratingDismissedRef = useRef(false);
 
   const load = useCallback(async () => {
     const [{ data: bData }, { data: oData }] = await Promise.all([
@@ -108,7 +109,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
         .eq('rater_id', profile.id)
         .maybeSingle();
       setHasRated(!!existingRating);
-      if (!existingRating) setShowRating(true);
+      if (!existingRating && !ratingDismissedRef.current) setShowRating(true);
     } else {
       setShowRating(false);
       setHasRated(false);
@@ -420,8 +421,8 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
                   <PayRow label="Delivery 60% — Driver (95%)" value={formatCurrency(payout2)} color="text-accent-600" />
                   <div className="h-px bg-slate-100 my-1" />
                   <PayRow label="Driver total payout (97%)" value={formatCurrency(driverTotal)} bold color="text-accent-600" />
-                  <PayRow label="First payment" value={booking.payout_1_status === 'paid' ? 'Paid' : 'Pending'} color={booking.payout_1_status === 'paid' ? 'text-accent-600' : 'text-amber-600'} />
-                  <PayRow label="Second payment" value={booking.payout_2_status === 'paid' ? 'Paid' : 'Pending'} color={booking.payout_2_status === 'paid' ? 'text-accent-600' : 'text-amber-600'} />
+                  <PayRow label="Pickup 40% payment" value={booking.payout_1_status === 'paid' ? 'Paid' : 'Pending'} color={booking.payout_1_status === 'paid' ? 'text-accent-600' : 'text-amber-600'} />
+                  <PayRow label="Delivery 60% payment" value={booking.payout_2_status === 'paid' ? 'Paid' : 'Pending'} color={booking.payout_2_status === 'paid' ? 'text-accent-600' : 'text-amber-600'} />
                 </div>
               </div>
             )}
@@ -559,7 +560,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
           raterId={profile.id}
           raterRole="shipper"
           onDone={() => { setShowRating(false); setHasRated(true); setMsg({ type: 'success', text: 'Rating submitted!' }); }}
-          onSkip={() => setShowRating(false)}
+          onSkip={() => { ratingDismissedRef.current = true; setShowRating(false); }}
         />
       )}
     </div>
