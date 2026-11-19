@@ -54,9 +54,9 @@ export async function geocode(location: string): Promise<{ lat: number; lng: num
   if (city) return { lat: city.lat, lng: city.lng };
 
   // OSRM does not provide geocoding; use Nominatim (OpenStreetMap) as a
-  // free, key-less geocoder biased toward India.
-  const q = encodeURIComponent(`${location}, Maharashtra, India`);
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${q}`;
+  // free, key-less geocoder covering every Indian state without forcing Maharashtra.
+  const q = encodeURIComponent(location.trim());
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=in&q=${q}`;
   try {
     const res = await fetch(url, { headers: { Accept: 'application/json' } });
     if (!res.ok) return null;

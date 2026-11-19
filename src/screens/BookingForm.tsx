@@ -163,7 +163,7 @@ export default function BookingForm({ shipperId, onBack, onCreated }: Props) {
             onChange={(v, c) => {
               setPickup(v);
               setPickupCity(c);
-              setPickupPoint(null);
+              setPickupPoint(c ? { lat: c.lat, lng: c.lng } : null);
             }}
             placeholder="e.g. Nagpur"
             accentColor="accent"
@@ -179,7 +179,7 @@ export default function BookingForm({ shipperId, onBack, onCreated }: Props) {
             onChange={(v, c) => {
               setDrop(v);
               setDropCity(c);
-              setDropPoint(null);
+              setDropPoint(c ? { lat: c.lat, lng: c.lng } : null);
             }}
             placeholder="e.g. Nashik"
             accentColor="error"
