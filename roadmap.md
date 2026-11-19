@@ -1,4 +1,11 @@
-# Current request — 40/60 trip payments
+# Current request — Driver profile ratings and reviews
+
+- [ ] Add a persistent Rate & review action to the assigned driver's profile after trip completion.
+- [ ] Show the driver's average rating, total ratings and recent written reviews to trip participants and on the driver's own account.
+- [ ] Keep submissions limited to one completed-trip participant rating per booking and protect review visibility.
+- [ ] Verify submission, reload readback, permissions, tests and phone/desktop layouts.
+
+# Completed — 40/60 trip payments
 
 - [x] Show shipper loading responsibility and 40% pickup / 60% after POD+OTP conditions after booking.
 - [x] Record cash/online stage payments and require driver confirmation before marking them paid.

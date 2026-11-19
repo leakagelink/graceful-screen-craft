@@ -85,6 +85,13 @@
       "when": 1795089901581,
       "tag": "0011_share_driver_upi_for_assigned_trip",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1795090624974,
+      "tag": "0012_driver_profile_ratings_reviews",
+      "breakpoints": true
     }
   ]
 }

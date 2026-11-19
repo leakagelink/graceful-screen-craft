@@ -32,6 +32,8 @@ import CancelReasonSheet from '@/components/CancelReasonSheet';
 import TripConditions from '@/components/TripConditions';
 import TripPaymentPanel from '@/components/TripPaymentPanel';
 import DeliveryProofPanel from '@/components/DeliveryProofPanel';
+import DriverRatingCard from '@/components/DriverRatingCard';
+import { canRateDriver } from '@/lib/ratings';
 
 interface OfferWithDriver extends Offer {
   driver_name?: string;
@@ -59,6 +61,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
   const [showCancel, setShowCancel] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [hasRated, setHasRated] = useState(false);
+  const [ratingVersion, setRatingVersion] = useState(0);
   const [deliveryCode, setDeliveryCode] = useState<string | null>(null);
   const ratingDismissedRef = useRef(false);
 
@@ -362,6 +365,16 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
               </div>
             )}
 
+            {driverProfile && booking.driver_id && (
+              <DriverRatingCard
+                driverId={booking.driver_id}
+                canRate={canRateDriver(booking.status, hasRated)}
+                hasRated={hasRated}
+                onRate={() => setShowRating(true)}
+                refreshKey={ratingVersion}
+              />
+            )}
+
             <div className="bg-white rounded-2xl border border-slate-200 p-5 animate-fade-in-up">
               <h3 className="font-bold text-slate-900 text-sm mb-4">Trip Progress</h3>
               <TripStep label="Driver assigned" done={true} />
@@ -559,7 +572,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
           rateeName={driverProfile?.full_name ?? 'Driver'}
           raterId={profile.id}
           raterRole="shipper"
-          onDone={() => { setShowRating(false); setHasRated(true); setMsg({ type: 'success', text: 'Rating submitted!' }); }}
+          onDone={() => { setShowRating(false); setHasRated(true); setRatingVersion((version) => version + 1); setMsg({ type: 'success', text: 'Rating & review submitted!' }); }}
           onSkip={() => { ratingDismissedRef.current = true; setShowRating(false); }}
         />
       )}

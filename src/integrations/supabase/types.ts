@@ -1023,6 +1023,7 @@ export type Database = {
           upi_id: string
         }[]
       }
+      driver_reviews: { Args: { _driver_id: string }; Returns: Json }
       get_trip_settings: {
         Args: never
         Returns: {

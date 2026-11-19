@@ -41,10 +41,10 @@ export function RatingModal({ bookingId, rateeId, rateeName, raterId, raterRole,
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl w-full max-w-sm p-6 animate-scale-in">
+      <div role="dialog" aria-modal="true" aria-labelledby="rating-dialog-title" className="bg-white rounded-2xl w-full max-w-sm p-6 animate-scale-in">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-slate-900">Rate {rateeName}</h3>
-          <button onClick={onSkip} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100">
+          <h3 id="rating-dialog-title" className="font-bold text-slate-900">Rate {rateeName}</h3>
+          <button type="button" aria-label="Close rating" onClick={onSkip} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -55,6 +55,9 @@ export function RatingModal({ bookingId, rateeId, rateeName, raterId, raterRole,
           {[1, 2, 3, 4, 5].map((n) => (
             <button
               key={n}
+              type="button"
+              aria-label={`${n} star${n === 1 ? '' : 's'}`}
+              aria-pressed={rating === n}
               onClick={() => setRating(n)}
               onMouseEnter={() => setHover(n)}
               onMouseLeave={() => setHover(0)}
@@ -70,14 +73,16 @@ export function RatingModal({ bookingId, rateeId, rateeName, raterId, raterRole,
         </div>
 
         <textarea
+          aria-label="Written review"
+          maxLength={1000}
           className={`${inputClass} resize-none mb-3`}
-          rows={2}
+          rows={3}
           placeholder="Write a review (optional)…"
           value={review}
           onChange={(e) => setReview(e.target.value)}
         />
 
-        {error && <p className="text-xs text-error-600 mb-3">{error}</p>}
+        {error && <p role="alert" className="text-xs text-error-600 mb-3">{error}</p>}
 
         <div className="flex gap-2">
           <Button variant="secondary" size="md" className="flex-1" onClick={onSkip}>Skip</Button>
