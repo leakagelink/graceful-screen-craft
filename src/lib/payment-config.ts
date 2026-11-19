@@ -15,9 +15,9 @@
  *
  * Payment Flow (when activated):
  * - Trip total = 100%
- * - First 50% → Driver, 0% Vahakam commission
- * - After Delivery OTP, final 50% becomes payable
- * - Final 50% → 5% Vahakam commission + 95% Driver
+ * - Pickup 40% → Driver, 0% Vahakam commission
+ * - After POD and Delivery OTP, final 60% becomes payable
+ * - Final 60% → 5% Vahakam commission + 95% Driver
  *
  * NEVER expose secret keys in frontend code.
  * NEVER hardcode real credentials.
@@ -27,7 +27,8 @@ export const PAYMENT_MODE = 'manual' as const;
 
 export const PAYMENT_STATUS_LABELS: Record<string, string> = {
   NOT_REQUIRED: 'Not Required',
-  PENDING: 'Pending',
+  PENDING: 'Driver confirmation pending',
+  PARTIALLY_PAID: '40% confirmed · 60% pending',
   MANUAL_PAYMENT: 'Manual Payment',
   PAID: 'Paid',
   FAILED: 'Failed',
@@ -37,6 +38,7 @@ export const PAYMENT_STATUS_LABELS: Record<string, string> = {
 export const PAYMENT_STATUS_COLORS: Record<string, string> = {
   NOT_REQUIRED: 'slate',
   PENDING: 'amber',
+  PARTIALLY_PAID: 'blue',
   MANUAL_PAYMENT: 'amber',
   PAID: 'green',
   FAILED: 'red',
@@ -52,7 +54,9 @@ export function getPaymentInstructions(status: string): string | null {
     case 'MANUAL_PAYMENT':
       return 'Pay the driver directly in cash or via UPI after delivery. The admin will verify the payment once confirmed.';
     case 'PENDING':
-      return 'Payment is pending. Please coordinate with the driver to complete the payment.';
+      return 'Payment reported. Driver will confirm after receiving it.';
+    case 'PARTIALLY_PAID':
+      return 'Pickup 40% is confirmed. The remaining 60% is due after POD and delivery OTP.';
     case 'PAID':
       return 'Payment has been confirmed and completed.';
     case 'FAILED':

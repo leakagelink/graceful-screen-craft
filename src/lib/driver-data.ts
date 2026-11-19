@@ -1,5 +1,5 @@
 import type { Booking } from '@/lib/supabase';
-import { calcDriverPayout } from '@/lib/commission';
+import { calcDriverPayout, calcPayout1, calcPayout2 } from '@/lib/commission';
 
 export type DriverBooking = Booking & { pickup_lat?: number | null; pickup_lng?: number | null };
 export function pickupDistance(booking: DriverBooking, coords: { lat: number; lng: number } | null) {
@@ -13,7 +13,7 @@ export function driverEarnings(bookings: Booking[]) {
   const amount = (b: Booking) => Number(b.driver_total_payout ?? calcDriverPayout(Number(b.agreed_fare ?? b.total_fare)));
   return {
     earned: earned.reduce((sum, b) => sum + amount(b), 0),
-    paid: bookings.reduce((sum, b) => sum + (b.payout_status === 'transferred' ? amount(b) : (b.payout_1_status === 'paid' ? Math.round(Number(b.agreed_fare ?? b.total_fare) / 2) : 0) + (b.payout_2_status === 'paid' ? amount(b) - Math.round(Number(b.agreed_fare ?? b.total_fare) / 2) : 0)), 0),
+    paid: bookings.reduce((sum, b) => sum + (b.payout_status === 'transferred' ? amount(b) : (b.payout_1_status === 'paid' ? calcPayout1(Number(b.agreed_fare ?? b.total_fare)) : 0) + (b.payout_2_status === 'paid' ? calcPayout2(Number(b.agreed_fare ?? b.total_fare)) : 0)), 0),
     completed: earned.length,
   };
 }

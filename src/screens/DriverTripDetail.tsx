@@ -28,6 +28,9 @@ import { Button, Badge, Spinner, Field, inputClass } from '@/components/ui';
 import { STATUS_META } from '@/components/BookingCard';
 import { RatingModal } from '@/components/RatingModal';
 import { useAppSettings } from '@/lib/settings';
+import TripConditions from '@/components/TripConditions';
+import TripPaymentPanel from '@/components/TripPaymentPanel';
+import DeliveryProofPanel from '@/components/DeliveryProofPanel';
 
 import { actOnTrip } from '@/lib/trips';
 
@@ -184,7 +187,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
   async function submitOffer() { await runAction('offer', { amount: myOffer }, 'Offer sent to the shipper.'); }
   async function startTrip() { await runAction('start'); }
   async function completeTrip() { await runAction('request_delivery', {}, 'Delivery code is ready on the shipper’s Load Details page. Ask them after delivery.'); }
-  async function verifyOtp() { await runAction('verify_delivery', { otp: otpInput.trim() }, 'Delivery verified. Trip completed; payment status is unchanged.'); }
+  async function verifyOtp() { await runAction('verify_delivery', { otp: otpInput.trim() }, 'Delivery verified with POD and OTP. The remaining 60% payment is now due.'); }
 
   const myOfferRow = offers.find((o) => o.driver_id === profile?.id);
   const hasMyOffer = !!myOfferRow;
@@ -261,6 +264,8 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
             </div>
           </div>
         </div>
+
+        <TripConditions fare={finalFare} />
 
         {/* My offer status */}
         {myOfferRow && !isAssigned && (
@@ -361,12 +366,19 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
               <TripStep label="Delivery confirmed" done={booking.status === 'completed'} active={booking.status === 'delivered'} />
             </div>
 
+            <TripPaymentPanel booking={booking} role="driver" onChanged={load} />
+
             {/* Start trip button */}
             {booking.status === 'assigned' && (
-              <Button variant="primary" size="lg" className="w-full" onClick={startTrip} disabled={busy} loading={busy}>
-                Start Trip
-              </Button>
+              <div className="space-y-2">
+                {booking.payout_1_status !== 'paid' && <p className="text-sm text-amber-700 text-center">Trip start karne se pehle 40% payment receive confirm karein.</p>}
+                <Button variant="primary" size="lg" className="w-full" onClick={startTrip} disabled={busy || booking.payout_1_status !== 'paid'} loading={busy}>
+                  Start Trip
+                </Button>
+              </div>
             )}
+
+            <DeliveryProofPanel booking={booking} role="driver" onChanged={load} />
 
             {/* Active trip — complete trip button */}
             {booking.status === 'in_progress' && (
@@ -432,16 +444,16 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
                 </div>
                 <div className="space-y-2.5 text-sm">
                   <PayRow label="Final fare" value={formatCurrency(finalFare)} bold />
-                  <PayRow label="Vahakam commission (5% of 2nd half)" value={`− ${formatCurrency(commission)}`} color="text-error-600" />
+                  <PayRow label="Vahakam commission (5% of delivery 60%)" value={`− ${formatCurrency(commission)}`} color="text-error-600" />
                   <div className="h-px bg-slate-100 my-1" />
-                  <PayRow label="Driver total payout (97.5%)" value={formatCurrency(driverTotal)} bold color="text-accent-600" />
-                  <PayRow label="First payment (50%, 0% commission)" value={formatCurrency(payout1)} />
+                  <PayRow label="Driver total payout (97%)" value={formatCurrency(driverTotal)} bold color="text-accent-600" />
+                  <PayRow label="Pickup payment (40%, 0% commission)" value={formatCurrency(payout1)} />
                   <PayRow
                     label="First payment status"
                     value={booking.payout_1_status === 'paid' ? 'Paid' : booking.payout_1_status === 'failed' ? 'Failed' : 'Pending'}
                     color={booking.payout_1_status === 'paid' ? 'text-accent-600' : booking.payout_1_status === 'failed' ? 'text-error-600' : 'text-amber-600'}
                   />
-                  <PayRow label="Second payment (50%, 5% commission)" value={formatCurrency(payout2)} />
+                  <PayRow label="Delivery payment (60%, 5% commission)" value={formatCurrency(payout2)} />
                   <PayRow
                     label="Second payment status"
                     value={booking.payout_2_status === 'paid' ? 'Paid' : booking.payout_2_status === 'failed' ? 'Failed' : 'Pending'}
@@ -452,12 +464,12 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
                 {booking.status === 'delivered' && booking.payout_2_status !== 'paid' && (
                   <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg px-3 py-3 text-sm text-amber-800">
                     <p className="font-semibold mb-1">Manual Payment Mode</p>
-                    <p className="text-xs">The shipper will pay you directly. Once you receive the payment, ask the admin to verify it in the admin panel.</p>
+                    <p className="text-xs">The shipper will pay you directly. Confirm the payment above only after you receive it.</p>
                   </div>
                 )}
                 {booking.status === 'completed' && (
                   <div className="mt-4 flex items-center gap-2 text-sm text-accent-700 bg-accent-50 rounded-lg px-3 py-2.5">
-                    <CheckCircle2 className="w-4 h-4" /> Delivery confirmed. Payment status is unchanged.
+                    <CheckCircle2 className="w-4 h-4" /> POD and OTP confirmed. The remaining 60% payment is now due.
                   </div>
                 )}
               </div>

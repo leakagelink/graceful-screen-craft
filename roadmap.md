@@ -1,3 +1,10 @@
+# Current request — 40/60 trip payments
+
+- [ ] Show shipper loading responsibility and 40% pickup / 60% after POD+OTP conditions after booking.
+- [ ] Record cash/online stage payments and require driver confirmation before marking them paid.
+- [ ] Require confirmed 40% before trip start and POD before delivery OTP; unlock 60% only after verified delivery.
+- [ ] Verify shipper and driver flows, regression tests, desktop and phone layouts.
+
 # Phase 1
 
 - [x] Connect Lovable Cloud.

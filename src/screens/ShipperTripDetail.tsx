@@ -29,7 +29,9 @@ import { Button, Badge, Field, inputClass } from '@/components/ui';
 import { STATUS_META } from '@/components/BookingCard';
 import { RatingModal } from '@/components/RatingModal';
 import CancelReasonSheet from '@/components/CancelReasonSheet';
-import ManualPaymentPanel from '@/components/ManualPaymentPanel';
+import TripConditions from '@/components/TripConditions';
+import TripPaymentPanel from '@/components/TripPaymentPanel';
+import DeliveryProofPanel from '@/components/DeliveryProofPanel';
 
 interface OfferWithDriver extends Offer {
   driver_name?: string;
@@ -234,6 +236,8 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
           </div>
         </div>
 
+        <TripConditions fare={finalFare} />
+
         {/* Message banner */}
         {msg && (
           <div className={`rounded-xl p-3.5 flex items-start gap-3 animate-scale-in ${
@@ -315,7 +319,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
           </div>
         )}
 
-        <ManualPaymentPanel bookingId={booking.id} amount={finalFare} paymentStatus={booking.payment_status} />
+        {hasDriver && <TripPaymentPanel booking={booking} role="shipper" onChanged={load} />}
 
         {/* --- ASSIGNED: trip progress + chat --- */}
         {hasDriver && (
@@ -365,6 +369,8 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
               <TripStep label="Delivery confirmed" done={booking.status === 'completed'} active={booking.status === 'delivered'} />
             </div>
 
+            <DeliveryProofPanel booking={booking} role="shipper" />
+
             {/* Delivery OTP display for shipper */}
             {booking.status === 'otp_sent' && deliveryCode && (
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-center animate-scale-in">
@@ -394,7 +400,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
                 )}
                 {booking.payment_verified_at && (
                   <p className="text-xs text-slate-400 mt-2">
-                    Verified by admin on {new Date(booking.payment_verified_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    Payment confirmed on {new Date(booking.payment_verified_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </p>
                 )}
               </div>
@@ -409,11 +415,11 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
                 </div>
                 <div className="space-y-2 text-sm">
                   <PayRow label="Final fare" value={formatCurrency(finalFare)} bold />
-                  <PayRow label="First 50% — Driver (0% commission)" value={formatCurrency(payout1)} color="text-accent-600" />
-                  <PayRow label="Second 50% — Vahakam commission (5%)" value={formatCurrency(commission)} color="text-error-600" />
-                  <PayRow label="Second 50% — Driver (95%)" value={formatCurrency(payout2)} color="text-accent-600" />
+                  <PayRow label="Pickup 40% — Driver (0% commission)" value={formatCurrency(payout1)} color="text-accent-600" />
+                  <PayRow label="Delivery 60% — Vahakam commission (5%)" value={formatCurrency(commission)} color="text-error-600" />
+                  <PayRow label="Delivery 60% — Driver (95%)" value={formatCurrency(payout2)} color="text-accent-600" />
                   <div className="h-px bg-slate-100 my-1" />
-                  <PayRow label="Driver total payout (97.5%)" value={formatCurrency(driverTotal)} bold color="text-accent-600" />
+                  <PayRow label="Driver total payout (97%)" value={formatCurrency(driverTotal)} bold color="text-accent-600" />
                   <PayRow label="First payment" value={booking.payout_1_status === 'paid' ? 'Paid' : 'Pending'} color={booking.payout_1_status === 'paid' ? 'text-accent-600' : 'text-amber-600'} />
                   <PayRow label="Second payment" value={booking.payout_2_status === 'paid' ? 'Paid' : 'Pending'} color={booking.payout_2_status === 'paid' ? 'text-accent-600' : 'text-amber-600'} />
                 </div>

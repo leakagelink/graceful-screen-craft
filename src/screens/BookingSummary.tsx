@@ -20,7 +20,7 @@ import { getVehicle, formatCurrency } from '@/lib/fare';
 import { calcCommissionFromSecondHalf, calcDriverPayout } from '@/lib/commission';
 import { Badge, Button, Spinner } from '@/components/ui';
 import { STATUS_META } from '@/components/BookingCard';
-import ManualPaymentPanel from '@/components/ManualPaymentPanel';
+import TripConditions from '@/components/TripConditions';
 
 interface Props {
   booking: Booking;
@@ -131,6 +131,8 @@ export default function BookingSummary({
           </div>
         </div>
 
+        <TripConditions fare={Number(booking.agreed_fare ?? booking.total_fare)} />
+
         {/* Trip card */}
         <div className="bg-white rounded-2xl border border-slate-200 p-5 animate-fade-in-up">
           <div className="flex items-center justify-between mb-4">
@@ -231,20 +233,18 @@ export default function BookingSummary({
           </div>
           <div className="space-y-2.5 text-sm">
             <FareRow
-              label="Vahakam commission (5% of 2nd half)"
+              label="Vahakam commission (5% of delivery 60%)"
               value={formatCurrency(commission)}
             />
             <FareRow
-              label="Driver payout (97.5%)"
+              label="Driver payout (97%)"
               value={formatCurrency(driverShare)}
             />
           </div>
           <p className="text-xs text-slate-400 mt-3">
-            The driver receives 97.5% of the fare. Vahakam takes a small 5% commission only on the second half. Payment is settled directly between shipper and driver.
+            The driver receives 97% of the fare. Vahakam takes a 5% commission only on the delivery 60% portion. Payment is recorded directly between shipper and driver.
           </p>
         </div>
-
-        <ManualPaymentPanel bookingId={booking.id} amount={Number(booking.agreed_fare ?? booking.total_fare)} paymentStatus={booking.payment_status} />
 
         {error && (
           <div className="bg-error-500/10 border border-error-500/20 rounded-xl p-3.5 flex items-start gap-3 animate-scale-in">

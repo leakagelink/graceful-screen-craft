@@ -276,6 +276,42 @@ export type Database = {
           },
         ]
       }
+      delivery_proofs: {
+        Row: {
+          booking_id: string
+          created_at: string
+          driver_id: string
+          file_path: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          driver_id: string
+          file_path: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          driver_id?: string
+          file_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_proofs_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_proofs_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disputes: {
         Row: {
           admin_note: string | null
@@ -867,6 +903,70 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_payments: {
+        Row: {
+          amount: number
+          booking_id: string
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          id: string
+          method: string
+          reported_by: string
+          stage: string
+          status: string
+          transaction_reference: string | null
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          id?: string
+          method: string
+          reported_by: string
+          stage: string
+          status?: string
+          transaction_reference?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          id?: string
+          method?: string
+          reported_by?: string
+          stage?: string
+          status?: string
+          transaction_reference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_payments_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_payments_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -915,7 +1015,14 @@ export type Database = {
         }
         Returns: Json
       }
+      confirm_trip_payment: { Args: { _payment_id: string }; Returns: Json }
       delivery_receipt: { Args: { _booking_id: string }; Returns: Json }
+      driver_payment_details: {
+        Args: { _booking_id: string }
+        Returns: {
+          upi_id: string
+        }[]
+      }
       get_trip_settings: {
         Args: never
         Returns: {
@@ -931,6 +1038,19 @@ export type Database = {
         Returns: boolean
       }
       initialize_account: { Args: { _role: string }; Returns: undefined }
+      register_delivery_proof: {
+        Args: { _booking_id: string; _file_path: string }
+        Returns: Json
+      }
+      report_trip_payment: {
+        Args: {
+          _booking_id: string
+          _method: string
+          _reference?: string
+          _stage: string
+        }
+        Returns: Json
+      }
       review_manual_payment: {
         Args: { _note?: string; _request_id: string; _status: string }
         Returns: Json

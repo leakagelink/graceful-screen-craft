@@ -71,6 +71,20 @@
       "when": 1795089319660,
       "tag": "0009_enforce_driver_availability",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795089813199,
+      "tag": "0010_trip_payment_40_60_and_pod",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795089901581,
+      "tag": "0011_share_driver_upi_for_assigned_trip",
+      "breakpoints": true
     }
   ]
 }

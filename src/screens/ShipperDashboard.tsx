@@ -228,6 +228,10 @@ export default function ShipperDashboard({ variant = 'home', onNewBooking, onOpe
                 footer={
                   b.payment_status === 'PAID' ? (
                     <Badge color="green">Payment confirmed</Badge>
+                  ) : b.payment_status === 'PARTIALLY_PAID' ? (
+                    <Badge color="blue">40% confirmed · 60% pending</Badge>
+                  ) : b.payment_status === 'PENDING' ? (
+                    <Badge color="amber">Driver confirmation pending</Badge>
                   ) : b.payment_status === 'MANUAL_PAYMENT' ? (
                     <Badge color="amber">Payment verification pending</Badge>
                   ) : b.payment_status === 'FAILED' ? (

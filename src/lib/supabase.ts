@@ -105,7 +105,7 @@ export interface Booking {
   driver_lat: number | null;
   driver_lng: number | null;
   driver_location_updated_at: string | null;
-  payment_status: 'NOT_REQUIRED' | 'PENDING' | 'MANUAL_PAYMENT' | 'PAID' | 'FAILED' | 'REFUNDED';
+  payment_status: 'NOT_REQUIRED' | 'PENDING' | 'PARTIALLY_PAID' | 'MANUAL_PAYMENT' | 'PAID' | 'FAILED' | 'REFUNDED';
   payment_method: 'manual' | 'razorpay' | null;
   payment_verified_by: string | null;
   payment_verified_at: string | null;
