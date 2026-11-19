@@ -1,4 +1,12 @@
-# Current request — Activity and admin notifications
+# Current request — Full end-to-end panel verification
+
+- [x] Run all automated regression tests and check hosted backend health.
+- [ ] Exercise shipper booking, manual payment, trip progress, delivery, rating and alerts with real accounts.
+- [ ] Exercise driver availability, offer acceptance, chat, 40/60 confirmations, POD/OTP and receipt.
+- [ ] Exercise admin payment review, KYC, settings and manual notifications.
+- [ ] Check desktop/mobile layouts, browser console/network failures and in-app Back behavior; fix any regression found.
+
+# Completed — Activity and admin notifications
 
 - [x] Update the Alerts screen and bell in realtime without automatically requesting device permission.
 - [x] Notify relevant users for bookings, offers, messages, trip progress/cancellation, POD, ratings, KYC and disputes without duplicating existing payment alerts.
