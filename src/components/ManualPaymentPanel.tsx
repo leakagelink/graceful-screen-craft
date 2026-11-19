@@ -50,7 +50,10 @@ export default function ManualPaymentPanel({ bookingId, amount, paymentStatus }:
       .on('postgres_changes', { event: '*', schema: 'public', table: 'manual_payment_methods' }, () => void load())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'manual_payment_requests', filter: `booking_id=eq.${bookingId}` }, () => void load())
       .subscribe();
-    return () => { void supabase.removeChannel(channel); };
+    // A method that becomes invisible under RLS may not emit an update event, so poll
+    // while the payment panel is open to reflect admin enable/disable changes too.
+    const refresh = window.setInterval(() => void load(), 5000);
+    return () => { window.clearInterval(refresh); void supabase.removeChannel(channel); };
   }, [bookingId, load]);
 
   useEffect(() => {

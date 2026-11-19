@@ -84,7 +84,7 @@ function MethodEditor({ method, onChanged }: { method: ManualPaymentMethod; onCh
   const [error, setError] = useState('');
   const Icon = methodIcons[method.key];
 
-  useEffect(() => { setForm(toForm(method)); }, [method]);
+  useEffect(() => { setForm(toForm(method)); }, [method.key, method.updated_at]);
 
   function set(field: keyof MethodForm, value: string) { setForm((current) => ({ ...current, [field]: value })); }
 
