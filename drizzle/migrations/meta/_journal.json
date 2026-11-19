@@ -57,6 +57,13 @@
       "when": 1795059007110,
       "tag": "0007_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795086590356,
+      "tag": "0008_manual_payment_workflow",
+      "breakpoints": true
     }
   ]
 }

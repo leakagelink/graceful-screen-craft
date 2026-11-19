@@ -314,6 +314,136 @@ export type Database = {
           },
         ]
       }
+      manual_payment_methods: {
+        Row: {
+          account_holder: string | null
+          account_number: string | null
+          bank_name: string | null
+          enabled: boolean
+          ifsc: string | null
+          is_demo: boolean
+          key: string
+          label: string
+          payee_name: string | null
+          qr_image_url: string | null
+          updated_at: string
+          updated_by: string | null
+          upi_id: string | null
+        }
+        Insert: {
+          account_holder?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          enabled?: boolean
+          ifsc?: string | null
+          is_demo?: boolean
+          key: string
+          label: string
+          payee_name?: string | null
+          qr_image_url?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          upi_id?: string | null
+        }
+        Update: {
+          account_holder?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          enabled?: boolean
+          ifsc?: string | null
+          is_demo?: boolean
+          key?: string
+          label?: string
+          payee_name?: string | null
+          qr_image_url?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          upi_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_payment_methods_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manual_payment_requests: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          booking_id: string
+          created_at: string
+          id: string
+          method_key: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          shipper_id: string
+          status: string
+          transaction_reference: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          booking_id: string
+          created_at?: string
+          id?: string
+          method_key: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          shipper_id: string
+          status?: string
+          transaction_reference: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          booking_id?: string
+          created_at?: string
+          id?: string
+          method_key?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          shipper_id?: string
+          status?: string
+          transaction_reference?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_payment_requests_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manual_payment_requests_method_key_fkey"
+            columns: ["method_key"]
+            isOneToOne: false
+            referencedRelation: "manual_payment_methods"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "manual_payment_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manual_payment_requests_shipper_id_fkey"
+            columns: ["shipper_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           body: string
@@ -764,9 +894,26 @@ export type Database = {
         Args: { _driver_id: string; _reason?: string; _status: string }
         Returns: undefined
       }
+      admin_set_manual_payment_method_enabled: {
+        Args: { _enabled: boolean; _method_key: string }
+        Returns: Json
+      }
       admin_set_payment_status: {
         Args: { _booking_id: string; _status: string }
         Returns: undefined
+      }
+      admin_update_manual_payment_method: {
+        Args: {
+          _account_holder?: string
+          _account_number?: string
+          _bank_name?: string
+          _ifsc?: string
+          _method_key: string
+          _payee_name?: string
+          _qr_image_url?: string
+          _upi_id?: string
+        }
+        Returns: Json
       }
       delivery_receipt: { Args: { _booking_id: string }; Returns: Json }
       get_trip_settings: {
@@ -784,6 +931,10 @@ export type Database = {
         Returns: boolean
       }
       initialize_account: { Args: { _role: string }; Returns: undefined }
+      review_manual_payment: {
+        Args: { _note?: string; _request_id: string; _status: string }
+        Returns: Json
+      }
       submit_kyc: {
         Args: {
           _insurance_url?: string
@@ -794,6 +945,10 @@ export type Database = {
           _vehicle_number: string
         }
         Returns: undefined
+      }
+      submit_manual_payment: {
+        Args: { _booking_id: string; _method_key: string; _reference: string }
+        Returns: Json
       }
       trip_action: {
         Args: {

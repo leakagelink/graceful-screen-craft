@@ -24,6 +24,9 @@
 
 # Phase 4 — Payments
 
+- [ ] Add admin-controlled UPI, QR and bank transfer methods with demo details until replaced, plus per-method enable/disable controls.
+- [ ] Add shipper payment details, transaction/UTR submission, admin verification and automatic booking/dashboard status updates.
+- [ ] Verify method permissions, payment-request validation, approval/rejection and resubmission end to end.
 - [x] Add isolated mock checkout with success, failure, cancellation, retry and reset; verified signed-in booking summary/trip flow, reload readback and mobile layout. All 18 tests pass; demo records never update real payment/payout fields.
 
 - [x] Confirm business registration in India and payment-provider eligibility; built-in Stripe and Paddle are unavailable for this country/product combination.
