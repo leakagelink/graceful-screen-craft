@@ -16,12 +16,10 @@ export function useAppSettings() {
   useEffect(() => {
     let active = true;
     supabase
-      .from('app_settings')
-      .select('*')
-      .eq('id', 'default')
-      .maybeSingle()
+      .rpc('get_trip_settings')
       .then(({ data }) => {
-        if (active && data) setSettings(data as AppSettings);
+        const row = Array.isArray(data) ? data[0] : null;
+        if (active && row) setSettings((s) => ({ ...s, ...row }));
         if (active) setLoading(false);
       });
     return () => { active = false; };

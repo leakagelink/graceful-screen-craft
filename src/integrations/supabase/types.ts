@@ -769,6 +769,13 @@ export type Database = {
         Returns: undefined
       }
       delivery_receipt: { Args: { _booking_id: string }; Returns: Json }
+      get_trip_settings: {
+        Args: never
+        Returns: {
+          commission_rate: number
+          trip_otp_length: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
