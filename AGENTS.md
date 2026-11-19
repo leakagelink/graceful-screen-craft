@@ -30,6 +30,7 @@ use the editor.
 <!-- LOVABLE:END -->
 
 - The Vahakam app is a client-only SPA mounted from src/routes/index.tsx (src/VahakamApp.tsx) with in-memory screen switching, ported from the original Bolt shipper app; keeps the original screens intact.
+- Render location maps through MapLibre GL's Leaflet adapter with keyless OpenFreeMap styles and the bundled worker URL; this preserves the existing pin and GPS flow while providing modern vector styling, and attribution must stay visible.
 - Define the authentication context in a separate browser-safe state module so Fast Refresh cannot recreate its identity while a provider remains mounted.
 
 - Use the generated Cloud browser client through the legacy data-module re-export so all ported screens share one session.

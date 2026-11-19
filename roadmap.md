@@ -37,6 +37,7 @@
 
 # Phase 5 — Final testing and publishing
 
+- [x] Upgrade the location picker to a Rapido/Porter-style keyless vector map and verify pin, search, zoom and GPS flows on mobile.
 - [x] Run all existing regression tests and inspect content-page metadata.
 - [x] Re-run all 18 tests after mock-payment changes; verify public desktop/mobile account selection and consent-gated sign-in with no browser runtime errors.
 - [x] Verify signed-in driver navigation, profile save/readback after reload, desktop/mobile layout, accessible policy documents and sign-out; no runtime errors observed.
