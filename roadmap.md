@@ -1,9 +1,9 @@
 # Current request — Driver profile ratings and reviews
 
-- [ ] Add a persistent Rate & review action to the assigned driver's profile after trip completion.
-- [ ] Show the driver's average rating, total ratings and recent written reviews to trip participants and on the driver's own account.
-- [ ] Keep submissions limited to one completed-trip participant rating per booking and protect review visibility.
-- [ ] Verify submission, reload readback, permissions, tests and phone/desktop layouts.
+- [x] Add a persistent Rate & review action to the assigned driver's profile after trip completion.
+- [x] Show the driver's average rating, total ratings and recent written reviews to trip participants and on the driver's own account.
+- [x] Keep submissions limited to one completed-trip participant rating per booking and protect review visibility.
+- [x] Verify submission, reload readback, permissions, tests and phone/desktop layouts.
 
 # Completed — 40/60 trip payments
 
