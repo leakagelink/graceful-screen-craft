@@ -1,9 +1,9 @@
 # Current request — In-app Back navigation
 
-- [ ] Keep browser and Android Back inside the app and restore the previous shipper/driver screen or tab.
-- [ ] Return chat to its trip, trip details to its originating tab, and KYC to its originating screen.
-- [ ] Require explicit confirmation before exiting from the Android home screen.
-- [ ] Add regression tests and verify desktop/phone browser Back plus simulated native Back; real-device verification remains separate.
+- [x] Keep browser and Android Back inside the app and restore the previous shipper/driver screen or tab.
+- [x] Return chat to its trip, trip details to its originating tab, and KYC to its originating screen.
+- [x] Require explicit confirmation before exiting from the Android home screen.
+- [x] Add regression tests and verify desktop/phone browser Back plus simulated native Back; real-device verification remains separate.
 
 # Completed — Driver profile ratings and reviews
 
