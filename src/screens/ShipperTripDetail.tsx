@@ -34,6 +34,7 @@ import TripPaymentPanel from '@/components/TripPaymentPanel';
 import DeliveryProofPanel from '@/components/DeliveryProofPanel';
 import DriverRatingCard from '@/components/DriverRatingCard';
 import { canRateDriver } from '@/lib/ratings';
+import { downloadDeliveryReceipt } from '@/lib/delivery-receipt';
 
 interface OfferWithDriver extends Offer {
   driver_name?: string;
@@ -63,6 +64,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
   const [hasRated, setHasRated] = useState(false);
   const [ratingVersion, setRatingVersion] = useState(0);
   const [deliveryCode, setDeliveryCode] = useState<string | null>(null);
+  const [receiptBusy, setReceiptBusy] = useState(false);
   const ratingDismissedRef = useRef(false);
 
   const load = useCallback(async () => {
@@ -173,6 +175,14 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
     setMsg(null);
     setMsg({ type: 'success', text: 'Your load is still visible to drivers. Offers will appear here when drivers respond.' });
     setBusy(false);
+  }
+
+  async function downloadReceipt() {
+    setReceiptBusy(true);
+    setMsg(null);
+    try { await downloadDeliveryReceipt(booking.id); }
+    catch (error) { setMsg({ type: 'error', text: error instanceof Error ? error.message : 'Could not download receipt' }); }
+    finally { setReceiptBusy(false); }
   }
 
   return (
@@ -325,6 +335,57 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
 
         {hasDriver && <TripPaymentPanel booking={booking} role="shipper" onChanged={load} />}
 
+        {/* Payment status is useful before a driver is assigned too. */}
+        {booking.payment_status && booking.payment_status !== 'NOT_REQUIRED' && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 animate-fade-in-up">
+            <div className="flex items-center gap-2 mb-3">
+              <Wallet className="w-5 h-5 text-primary-600" />
+              <h3 className="font-bold text-slate-900 text-sm">Payment Status</h3>
+              <span className={`ml-auto px-2.5 py-1 rounded-full text-xs font-semibold ${
+                booking.payment_status === 'PAID' ? 'bg-accent-100 text-accent-700' :
+                booking.payment_status === 'FAILED' ? 'bg-error-100 text-error-700' :
+                booking.payment_status === 'REFUNDED' ? 'bg-slate-100 text-slate-700' :
+                'bg-amber-100 text-amber-700'
+              }`}>
+                {PAYMENT_STATUS_LABELS[booking.payment_status] ?? booking.payment_status}
+              </span>
+            </div>
+            {getPaymentInstructions(booking.payment_status) && (
+              <p className="text-xs text-slate-500 mt-1">{getPaymentInstructions(booking.payment_status)}</p>
+            )}
+            {booking.payment_verified_at && (
+              <p className="text-xs text-slate-400 mt-2">
+                Payment confirmed on {new Date(booking.payment_verified_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Cancellation is available before a driver is assigned. */}
+        {['available', 'paid', 'offer_made'].includes(booking.status) && !showCancel && (
+          <button
+            onClick={() => setShowCancel(true)}
+            className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-error-600 bg-error-500/5 hover:bg-error-500/10 rounded-xl py-2.5 transition-colors"
+          >
+            <Ban className="w-4 h-4" /> Cancel this booking
+          </button>
+        )}
+        {showCancel && (
+          <CancelReasonSheet
+            busy={busy}
+            onClose={() => setShowCancel(false)}
+            onSubmit={async (reason) => {
+              setBusy(true);
+              const { error } = await actOnTrip(booking.id, 'cancel', { reason });
+              setBusy(false);
+              if (error) { setMsg({ type: 'error', text: 'Could not cancel booking.' }); return; }
+              setShowCancel(false);
+              setMsg({ type: 'success', text: 'Booking cancelled.' });
+              await load();
+            }}
+          />
+        )}
+
         {/* --- ASSIGNED: trip progress + chat --- */}
         {hasDriver && (
           <>
@@ -394,32 +455,6 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
               </div>
             )}
 
-            {/* Payment status card */}
-            {booking.payment_status && booking.payment_status !== 'NOT_REQUIRED' && (
-              <div className="bg-white rounded-2xl border border-slate-200 p-5 animate-fade-in-up">
-                <div className="flex items-center gap-2 mb-3">
-                  <Wallet className="w-5 h-5 text-primary-600" />
-                  <h3 className="font-bold text-slate-900 text-sm">Payment Status</h3>
-                  <span className={`ml-auto px-2.5 py-1 rounded-full text-xs font-semibold ${
-                    booking.payment_status === 'PAID' ? 'bg-accent-100 text-accent-700' :
-                    booking.payment_status === 'FAILED' ? 'bg-error-100 text-error-700' :
-                    booking.payment_status === 'REFUNDED' ? 'bg-slate-100 text-slate-700' :
-                    'bg-amber-100 text-amber-700'
-                  }`}>
-                    {PAYMENT_STATUS_LABELS[booking.payment_status] ?? booking.payment_status}
-                  </span>
-                </div>
-                {getPaymentInstructions(booking.payment_status) && (
-                  <p className="text-xs text-slate-500 mt-1">{getPaymentInstructions(booking.payment_status)}</p>
-                )}
-                {booking.payment_verified_at && (
-                  <p className="text-xs text-slate-400 mt-2">
-                    Payment confirmed on {new Date(booking.payment_verified_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </p>
-                )}
-              </div>
-            )}
-
             {/* Payment split summary */}
             {['delivered', 'completed'].includes(booking.status) && (
               <div className="bg-white rounded-2xl border border-slate-200 p-5 animate-fade-in-up">
@@ -483,40 +518,11 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
 
             {/* POD download button */}
             {['delivered', 'completed'].includes(booking.status) && (
-              <a
-                href={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-pod?bookingId=${booking.id}`}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-accent-700 bg-accent-50 hover:bg-accent-100 rounded-xl py-3 transition-colors"
-              >
-                <FileText className="w-4 h-4" /> Download POD (Proof of Delivery)
-              </a>
+              <Button variant="secondary" className="w-full" onClick={downloadReceipt} disabled={receiptBusy} loading={receiptBusy}>
+                <FileText className="w-4 h-4" /> {receiptBusy ? 'Downloading…' : 'Download POD (Proof of Delivery)'}
+              </Button>
             )}
 
-            {/* Cancel booking — only before assignment is locked */}
-            {['available', 'paid', 'offer_made'].includes(booking.status) && !showCancel && (
-              <button
-                onClick={() => setShowCancel(true)}
-                className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-error-600 bg-error-500/5 hover:bg-error-500/10 rounded-xl py-2.5 transition-colors"
-              >
-                <Ban className="w-4 h-4" /> Cancel this booking
-              </button>
-            )}
-            {showCancel && (
-              <CancelReasonSheet
-                busy={busy}
-                onClose={() => setShowCancel(false)}
-                onSubmit={async (reason) => {
-                  setBusy(true);
-                  const { error } = await actOnTrip(booking.id, 'cancel', { reason });
-                  setBusy(false);
-                  if (error) { setMsg({ type: 'error', text: 'Could not cancel booking.' }); return; }
-                  setShowCancel(false);
-                  setMsg({ type: 'success', text: 'Booking cancelled.' });
-                  await load();
-                }}
-              />
-            )}
 
             {/* Raise dispute — only for assigned/in-progress/delivered */}
             {['assigned', 'in_progress', 'otp_sent', 'delivered', 'completed'].includes(booking.status) && !showDispute && (

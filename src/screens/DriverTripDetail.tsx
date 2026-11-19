@@ -31,6 +31,7 @@ import { useAppSettings } from '@/lib/settings';
 import TripConditions from '@/components/TripConditions';
 import TripPaymentPanel from '@/components/TripPaymentPanel';
 import DeliveryProofPanel from '@/components/DeliveryProofPanel';
+import { downloadDeliveryReceipt } from '@/lib/delivery-receipt';
 
 import { actOnTrip } from '@/lib/trips';
 
@@ -54,6 +55,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
   const [hasRated, setHasRated] = useState(false);
   const [shipperProfile, setShipperProfile] = useState<Profile | null>(null);
   const [tracking, setTracking] = useState(false);
+  const [receiptBusy, setReceiptBusy] = useState(false);
   const watchIdRef = useRef<number | null>(null);
   const ratingDismissedRef = useRef(false);
   const { settings } = useAppSettings();
@@ -189,6 +191,13 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
   async function startTrip() { await runAction('start'); }
   async function completeTrip() { await runAction('request_delivery', {}, 'Delivery code is ready on the shipper’s Load Details page. Ask them after delivery.'); }
   async function verifyOtp() { await runAction('verify_delivery', { otp: otpInput.trim() }, 'Delivery verified with POD and OTP. The remaining 60% payment is now due.'); }
+  async function downloadReceipt() {
+    setReceiptBusy(true);
+    setMsg(null);
+    try { await downloadDeliveryReceipt(booking.id); }
+    catch (error) { setMsg({ type: 'error', text: error instanceof Error ? error.message : 'Could not download receipt' }); }
+    finally { setReceiptBusy(false); }
+  }
 
   const myOfferRow = offers.find((o) => o.driver_id === profile?.id);
   const hasMyOffer = !!myOfferRow;
@@ -514,14 +523,9 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
 
             {/* POD download button */}
             {['delivered', 'completed'].includes(booking.status) && (
-              <a
-                href={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-pod?bookingId=${booking.id}`}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-accent-700 bg-accent-50 hover:bg-accent-100 rounded-xl py-3 transition-colors"
-              >
-                <FileText className="w-4 h-4" /> Download POD (Proof of Delivery)
-              </a>
+              <Button variant="secondary" className="w-full" onClick={downloadReceipt} disabled={receiptBusy} loading={receiptBusy}>
+                <FileText className="w-4 h-4" /> {receiptBusy ? 'Downloading…' : 'Download POD (Proof of Delivery)'}
+              </Button>
             )}
           </>
         )}

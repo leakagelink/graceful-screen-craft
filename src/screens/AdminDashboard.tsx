@@ -26,6 +26,7 @@ import ShipperSubscriptionAdmin from '@/components/ShipperSubscriptionAdmin';
 import ManualPaymentAdmin from '@/components/ManualPaymentAdmin';
 import AdminNotificationSender from '@/components/AdminNotificationSender';
 import { NotificationsBell } from '@/components/NotificationsBell';
+import KycDocumentLink from '@/components/KycDocumentLink';
 
 type Tab = 'overview' | 'users' | 'kyc' | 'bookings' | 'payments' | 'disputes' | 'subscriptions' | 'notifications' | 'settings';
 
@@ -170,7 +171,7 @@ export default function AdminDashboard() {
         ) : tab === 'notifications' ? (
           <AdminNotificationSender profiles={profiles} />
         ) : tab === 'settings' ? (
-          <SettingsTab settings={appSettings} onAction={load} />
+          <SettingsTab settings={appSettings} onAction={setAppSettings} />
         ) : null}
       </div>
     </div>
@@ -272,11 +273,7 @@ function KycReviewCard({ profile, onAction }: { profile: Profile; onAction: () =
 }
 
 function DocLink({ label, url }: { label: string; url: string }) {
-  return (
-    <a href={url} target="_blank" rel="noreferrer" className="flex-1 text-center text-xs font-semibold text-primary-700 bg-primary-50 rounded-lg py-2 hover:bg-primary-100 transition-colors">
-      View {label}
-    </a>
-  );
+  return <KycDocumentLink path={url} label={`View ${label}`} className="flex-1 text-center text-xs font-semibold text-primary-700 bg-primary-50 rounded-lg py-2 hover:bg-primary-100 transition-colors" />;
 }
 
 function BookingRow({ booking }: { booking: Booking }) {
@@ -303,15 +300,18 @@ function PaymentsTab({ bookings, profiles, onAction }: { bookings: Booking[]; pr
 function DisputeRow({ dispute, onAction }: { dispute: Dispute; onAction: () => void }) {
   const [busy, setBusy] = useState(false);
   const [resolution, setResolution] = useState('');
+  const [error, setError] = useState('');
 
   async function resolve(status: 'resolved' | 'dismissed') {
     setBusy(true);
-    await supabase.from('disputes').update({
-      status,
-      resolution: resolution || null,
-      resolved_at: new Date().toISOString(),
-    }).eq('id', dispute.id);
+    setError('');
+    const { error: failure } = await supabase.rpc('admin_resolve_dispute', {
+      _dispute_id: dispute.id,
+      _status: status,
+      _resolution: resolution || null,
+    });
     setBusy(false);
+    if (failure) { setError(failure.message); return; }
     onAction();
   }
 
@@ -332,6 +332,7 @@ function DisputeRow({ dispute, onAction }: { dispute: Dispute; onAction: () => v
           </div>
         </>
       )}
+      {error && <p role="alert" className="text-sm text-error-600">{error}</p>}
     </div>
   );
 }
@@ -372,7 +373,7 @@ function EmptyBox({ icon, text }: { icon: React.ReactNode; text: string }) {
   );
 }
 
-function SettingsTab({ settings, onAction }: { settings: AppSettings | null; onAction: () => void }) {
+function SettingsTab({ settings, onAction }: { settings: AppSettings | null; onAction: (settings: AppSettings) => void }) {
   const { profile } = useAuth();
   const [otpLength, setOtpLength] = useState(settings?.trip_otp_length ?? 6);
   const [commissionRate, setCommissionRate] = useState(settings ? Number(settings.commission_rate) * 100 : 5);
@@ -382,20 +383,20 @@ function SettingsTab({ settings, onAction }: { settings: AppSettings | null; onA
   async function save() {
     setBusy(true);
     setMsg(null);
-    const { error } = await supabase.from('app_settings').upsert({
+    const { data, error } = await supabase.from('app_settings').upsert({
       id: 'default',
       trip_otp_length: Math.max(4, Math.min(8, otpLength)),
       commission_rate: Math.max(0, Math.min(1, commissionRate / 100)),
       updated_at: new Date().toISOString(),
       updated_by: profile?.id,
-    });
+    }).select().single();
     setBusy(false);
     if (error) {
       setMsg({ type: 'error', text: 'Could not save settings.' });
       return;
     }
     setMsg({ type: 'success', text: 'Settings saved successfully.' });
-    onAction();
+    onAction(data as AppSettings);
   }
 
   return (

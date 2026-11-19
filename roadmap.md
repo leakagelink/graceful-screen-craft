@@ -1,10 +1,10 @@
-# Current request — Full end-to-end panel verification
+# Completed — Full end-to-end panel verification
 
-- [x] Run all automated regression tests and check hosted backend health.
-- [ ] Exercise shipper booking, manual payment, trip progress, delivery, rating and alerts with real accounts.
-- [ ] Exercise driver availability, offer acceptance, chat, 40/60 confirmations, POD/OTP and receipt.
-- [ ] Exercise admin payment review, KYC, settings and manual notifications.
-- [ ] Check desktop/mobile layouts, browser console/network failures and in-app Back behavior; fix any regression found.
+- [x] Run all 42 automated regression tests and check hosted backend health; latest build is clean.
+- [x] Exercise shipper booking, manual payment, trip progress, delivery, rating and alerts with real accounts.
+- [x] Exercise driver availability, offer acceptance, chat, 40/60 confirmations, POD/OTP and receipt.
+- [x] Exercise admin payment review, KYC approval, dispute resolution, settings and manual notifications.
+- [x] Check desktop/mobile layouts, browser console/network failures and in-app Back behavior; fixed payment-screen wiring, KYC storage/refresh, pre-assignment payment/cancel actions, trip-detail receipts and admin feedback.
 
 # Completed — Activity and admin notifications
 

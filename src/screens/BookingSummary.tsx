@@ -21,6 +21,8 @@ import { calcCommissionFromSecondHalf, calcDriverPayout } from '@/lib/commission
 import { Badge, Button, Spinner } from '@/components/ui';
 import { STATUS_META } from '@/components/BookingCard';
 import TripConditions from '@/components/TripConditions';
+import ManualPaymentPanel from '@/components/ManualPaymentPanel';
+import MockPaymentPanel from '@/components/MockPaymentPanel';
 
 interface Props {
   booking: Booking;
@@ -223,6 +225,19 @@ export default function BookingSummary({
               </span>
             </div>
           </div>
+        </div>
+
+        <ManualPaymentPanel
+          bookingId={booking.id}
+          amount={Number(booking.agreed_fare ?? booking.total_fare)}
+          paymentStatus={booking.payment_status}
+        />
+
+        <div className="bg-card text-card-foreground rounded-2xl border border-border px-5 shadow-3d">
+          <MockPaymentPanel
+            bookingId={booking.id}
+            amount={Number(booking.agreed_fare ?? booking.total_fare)}
+          />
         </div>
 
         {/* Payout info */}

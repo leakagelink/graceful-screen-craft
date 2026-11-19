@@ -3,13 +3,14 @@ import { ArrowLeft, ShieldCheck, FileText, Truck, Upload, CheckCircle2, Clock, X
 import { supabase, type KycStatus } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { Button, Field, inputClass, Spinner } from '@/components/ui';
+import KycDocumentLink from '@/components/KycDocumentLink';
 
 interface Props {
   onBack: () => void;
 }
 
 export default function KycScreen({ onBack }: Props) {
-  const { profile, loadProfile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
   const [licenseNumber, setLicenseNumber] = useState(profile?.license_number ?? '');
   const [rcNumber, setRcNumber] = useState(profile?.rc_number ?? '');
   const [vehicleNumber, setVehicleNumber] = useState(profile?.vehicle_number ?? '');
@@ -30,8 +31,7 @@ export default function KycScreen({ onBack }: Props) {
       console.error('Upload error:', error.message);
       return null;
     }
-    const { data } = supabase.storage.from('kyc-documents').getPublicUrl(path);
-    return data.publicUrl;
+    return path;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -79,7 +79,7 @@ export default function KycScreen({ onBack }: Props) {
       return;
     }
     setMsg({ type: 'success', text: 'KYC submitted! We will review your documents within 24 hours.' });
-    if (profile?.id) await loadProfile(profile.id);
+    await refreshProfile();
   }
 
   return (
@@ -201,11 +201,7 @@ function DocRow({ label, value }: { label: string; value: string | null | undefi
 }
 
 function DocLink({ url, label }: { url: string; label: string }) {
-  return (
-    <a href={url} target="_blank" rel="noreferrer" className="block text-center text-sm font-semibold text-primary-700 bg-primary-50 rounded-lg py-2.5 hover:bg-primary-100 transition-colors">
-      {label}
-    </a>
-  );
+  return <KycDocumentLink path={url} label={label} className="block text-center text-sm font-semibold text-primary-700 bg-primary-50 rounded-lg py-2.5 hover:bg-primary-100 transition-colors" />;
 }
 
 function StatusBadge({ status }: { status: KycStatus }) {

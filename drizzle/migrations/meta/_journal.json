@@ -99,6 +99,27 @@
       "when": 1795092256646,
       "tag": "0013_activity_and_admin_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795094638851,
+      "tag": "0014_secure_kyc_document_storage",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1795095034375,
+      "tag": "0015_admin_resolve_disputes",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1795095157195,
+      "tag": "0016_add_dispute_resolution_fields",
+      "breakpoints": true
     }
   ]
 }

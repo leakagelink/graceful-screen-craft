@@ -320,6 +320,8 @@ export type Database = {
           id: string
           raised_by: string
           reason: string
+          resolution: string | null
+          resolved_at: string | null
           status: string
         }
         Insert: {
@@ -329,6 +331,8 @@ export type Database = {
           id?: string
           raised_by: string
           reason: string
+          resolution?: string | null
+          resolved_at?: string | null
           status?: string
         }
         Update: {
@@ -338,6 +342,8 @@ export type Database = {
           id?: string
           raised_by?: string
           reason?: string
+          resolution?: string | null
+          resolved_at?: string | null
           status?: string
         }
         Relationships: [
@@ -990,6 +996,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_resolve_dispute: {
+        Args: { _dispute_id: string; _resolution?: string; _status: string }
+        Returns: undefined
+      }
       admin_review_kyc: {
         Args: { _driver_id: string; _reason?: string; _status: string }
         Returns: undefined
