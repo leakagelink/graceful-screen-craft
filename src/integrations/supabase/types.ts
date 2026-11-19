@@ -994,6 +994,15 @@ export type Database = {
         Args: { _driver_id: string; _reason?: string; _status: string }
         Returns: undefined
       }
+      admin_send_notification: {
+        Args: {
+          _audience: string
+          _body: string
+          _recipient_id: string
+          _title: string
+        }
+        Returns: Json
+      }
       admin_set_manual_payment_method_enabled: {
         Args: { _enabled: boolean; _method_key: string }
         Returns: Json

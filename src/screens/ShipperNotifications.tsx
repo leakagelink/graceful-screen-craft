@@ -34,6 +34,22 @@ export default function ShipperNotifications() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`notifications-page:${user.id}:${Math.random().toString(36).slice(2)}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, (payload) => {
+        const notification = payload.new as Notification;
+        if (payload.eventType === 'INSERT') {
+          setItems((current) => current.some((item) => item.id === notification.id) ? current : [notification, ...current].slice(0, 50));
+        } else if (payload.eventType === 'UPDATE') {
+          setItems((current) => current.map((item) => item.id === notification.id ? notification : item));
+        }
+      })
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [user]);
+
   const unread = items.filter((n) => !n.read).length;
 
   async function markAllRead() {

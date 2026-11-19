@@ -1,4 +1,11 @@
-# Current request — In-app Back navigation
+# Current request — Activity and admin notifications
+
+- [x] Update the Alerts screen and bell in realtime without automatically requesting device permission.
+- [x] Notify relevant users for bookings, offers, messages, trip progress/cancellation, POD, ratings, KYC and disputes without duplicating existing payment alerts.
+- [x] Add an admin-only notification composer for one user, all users, shippers or drivers.
+- [x] Verify automatic and manual delivery, authorization, tests and phone/desktop layouts.
+
+# Completed — In-app Back navigation
 
 - [x] Keep browser and Android Back inside the app and restore the previous shipper/driver screen or tab.
 - [x] Return chat to its trip, trip details to its originating tab, and KYC to its originating screen.

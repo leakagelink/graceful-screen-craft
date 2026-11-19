@@ -92,6 +92,13 @@
       "when": 1795090624974,
       "tag": "0012_driver_profile_ratings_reviews",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795092256646,
+      "tag": "0013_activity_and_admin_notifications",
+      "breakpoints": true
     }
   ]
 }

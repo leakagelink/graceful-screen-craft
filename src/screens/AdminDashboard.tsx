@@ -24,8 +24,10 @@ import { LangSwitcher } from '@/components/LangSwitcher';
 import { Settings as SettingsIcon } from 'lucide-react';
 import ShipperSubscriptionAdmin from '@/components/ShipperSubscriptionAdmin';
 import ManualPaymentAdmin from '@/components/ManualPaymentAdmin';
+import AdminNotificationSender from '@/components/AdminNotificationSender';
+import { NotificationsBell } from '@/components/NotificationsBell';
 
-type Tab = 'overview' | 'users' | 'kyc' | 'bookings' | 'payments' | 'disputes' | 'subscriptions' | 'settings';
+type Tab = 'overview' | 'users' | 'kyc' | 'bookings' | 'payments' | 'disputes' | 'subscriptions' | 'notifications' | 'settings';
 
 export default function AdminDashboard() {
   const { signOut } = useAuth();
@@ -93,6 +95,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <NotificationsBell />
               <LangSwitcher />
               <button onClick={signOut} className="w-9 h-9 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 transition-colors">
                 <LogOut className="w-4 h-4" />
@@ -111,7 +114,7 @@ export default function AdminDashboard() {
 
       <div className="max-w-3xl mx-auto px-4 -mt-5">
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex p-1 overflow-x-auto">
-          {(['overview', 'users', 'kyc', 'bookings', 'payments', 'disputes', 'subscriptions', 'settings'] as Tab[]).map((t) => (
+          {(['overview', 'users', 'kyc', 'bookings', 'payments', 'disputes', 'subscriptions', 'notifications', 'settings'] as Tab[]).map((t) => (
             <TabBtn key={t} active={tab === t} onClick={() => setTab(t)}>
               {t === 'kyc' && pendingKyc.length > 0 ? `${t} (${pendingKyc.length})` : t}
             </TabBtn>
@@ -164,6 +167,8 @@ export default function AdminDashboard() {
           ) : (
             disputes.map((d) => <DisputeRow key={d.id} dispute={d} onAction={load} />)
           )
+        ) : tab === 'notifications' ? (
+          <AdminNotificationSender profiles={profiles} />
         ) : tab === 'settings' ? (
           <SettingsTab settings={appSettings} onAction={load} />
         ) : null}
