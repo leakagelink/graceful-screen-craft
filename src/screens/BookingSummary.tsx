@@ -20,7 +20,7 @@ import { getVehicle, formatCurrency } from '@/lib/fare';
 import { calcCommissionFromSecondHalf, calcDriverPayout } from '@/lib/commission';
 import { Badge, Button, Spinner } from '@/components/ui';
 import { STATUS_META } from '@/components/BookingCard';
-import MockPaymentPanel from '@/components/MockPaymentPanel';
+import ManualPaymentPanel from '@/components/ManualPaymentPanel';
 
 interface Props {
   booking: Booking;
@@ -244,7 +244,7 @@ export default function BookingSummary({
           </p>
         </div>
 
-        <MockPaymentPanel bookingId={booking.id} amount={Number(booking.agreed_fare ?? booking.total_fare)} />
+        <ManualPaymentPanel bookingId={booking.id} amount={Number(booking.agreed_fare ?? booking.total_fare)} paymentStatus={booking.payment_status} />
 
         {error && (
           <div className="bg-error-500/10 border border-error-500/20 rounded-xl p-3.5 flex items-start gap-3 animate-scale-in">

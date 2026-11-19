@@ -71,7 +71,7 @@ export default function ManualPaymentAdmin({ bookings, profiles, onAction }: { b
 
     <section className="space-y-3" aria-label="Manual payment methods">
       <div><div className="flex items-center gap-2"><CreditCard className="w-5 h-5 text-primary" /><h2 className="font-bold">Payment methods</h2></div><p className="text-xs text-muted-foreground mt-1">Details save karte hi Demo badge hat jayega. Disabled method users ko nahi dikhega.</p></div>
-      {loading ? <p className="text-sm text-muted-foreground">Payment settings load ho rahi hain…</p> : methods.map((method) => <MethodEditor key={method.key} method={method} onChanged={changed} />)}
+      {loading ? <p className="text-sm text-muted-foreground">Payment settings load ho rahi hain…</p> : methods.map((method) => <MethodEditor key={method.key} method={method} onChanged={() => void load()} />)}
     </section>
     {error && <p role="alert" className="text-sm text-destructive bg-destructive/5 rounded-lg p-3">{error}</p>}
   </div>;
@@ -156,7 +156,7 @@ function MethodEditor({ method, onChanged }: { method: ManualPaymentMethod; onCh
   </article>;
 }
 
-function PaymentRequestCard({ request, booking, shipperName, onChanged }: { request: ManualPaymentRequest; booking?: Booking; shipperName?: string; onChanged: () => void }) {
+function PaymentRequestCard({ request, booking, shipperName, onChanged }: { request: ManualPaymentRequest; booking?: Booking | undefined; shipperName?: string | undefined; onChanged: () => void }) {
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');

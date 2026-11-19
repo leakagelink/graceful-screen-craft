@@ -47,6 +47,11 @@ export default function ShipperDashboard({ variant = 'home', onNewBooking, onOpe
 
   useEffect(() => {
     load();
+    const channel = supabase
+      .channel(`shipper-dashboard-bookings:${Math.random().toString(36).slice(2)}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [load]);
 
   const active = bookings.filter(
@@ -221,7 +226,13 @@ export default function ShipperDashboard({ variant = 'home', onNewBooking, onOpe
                 booking={b}
                 onClick={() => onOpenBooking(b)}
                 footer={
-                  b.status === 'available' ? (
+                  b.payment_status === 'PAID' ? (
+                    <Badge color="green">Payment confirmed</Badge>
+                  ) : b.payment_status === 'MANUAL_PAYMENT' ? (
+                    <Badge color="amber">Payment verification pending</Badge>
+                  ) : b.payment_status === 'FAILED' ? (
+                    <Badge color="red">Payment rejected — retry</Badge>
+                  ) : b.status === 'available' ? (
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-accent-600 font-medium flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" /> {t('dash.liveForDrivers')}

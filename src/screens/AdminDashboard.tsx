@@ -22,9 +22,8 @@ import { calcCommissionFromSecondHalf } from '@/lib/commission';
 import { STATUS_META } from '@/components/BookingCard';
 import { LangSwitcher } from '@/components/LangSwitcher';
 import { Settings as SettingsIcon } from 'lucide-react';
-import { PAYMENT_STATUS_LABELS } from '@/lib/payment-config';
-
 import ShipperSubscriptionAdmin from '@/components/ShipperSubscriptionAdmin';
+import ManualPaymentAdmin from '@/components/ManualPaymentAdmin';
 
 type Tab = 'overview' | 'users' | 'kyc' | 'bookings' | 'payments' | 'disputes' | 'subscriptions' | 'settings';
 
@@ -158,7 +157,7 @@ export default function AdminDashboard() {
         ) : tab === 'bookings' ? (
           bookings.map((b) => <BookingRow key={b.id} booking={b} />)
         ) : tab === 'payments' ? (
-          <PaymentsTab bookings={bookings} onAction={load} />
+          <PaymentsTab bookings={bookings} profiles={profiles} onAction={load} />
         ) : tab === 'disputes' ? (
           disputes.length === 0 ? (
             <EmptyBox icon={<AlertTriangle className="w-8 h-8" />} text="No disputes reported" />
@@ -292,79 +291,8 @@ function BookingRow({ booking }: { booking: Booking }) {
   );
 }
 
-function PaymentsTab({ bookings, onAction }: { bookings: Booking[]; onAction: () => void }) {
-  const paymentBookings = bookings.filter(
-    (b) => b.payment_status && b.payment_status !== 'NOT_REQUIRED' && b.status !== 'cancelled'
-  );
-  const pendingVerification = paymentBookings.filter(
-    (b) => b.payment_status === 'MANUAL_PAYMENT' || b.payment_status === 'PENDING'
-  );
-
-  return (
-    <div className="space-y-3">
-      {pendingVerification.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
-          <p className="font-semibold">{pendingVerification.length} payment(s) awaiting verification</p>
-          <p className="text-xs mt-0.5">Review and confirm manual payments below.</p>
-        </div>
-      )}
-      {paymentBookings.length === 0 ? (
-        <EmptyBox icon={<Wallet className="w-8 h-8" />} text="No payment records yet" />
-      ) : (
-        paymentBookings.map((b) => (
-          <PaymentRow key={b.id} booking={b} onAction={onAction} />
-        ))
-      )}
-    </div>
-  );
-}
-
-function PaymentRow({ booking, onAction }: { booking: Booking; onAction: () => void }) {
-  const { profile } = useAuth();
-  const [busy, setBusy] = useState(false);
-  const commission = Number(booking.commission_amount ?? calcCommissionFromSecondHalf(Number(booking.agreed_fare ?? booking.total_fare)));
-  const fare = Number(booking.agreed_fare ?? booking.total_fare);
-
-  async function verifyPayment(status: 'PAID' | 'FAILED') {
-    setBusy(true);
-    const { error } = await supabase.rpc('admin_set_payment_status', { _booking_id: booking.id, _status: status });
-    setBusy(false);
-    if (error) { alert(error.message); return; }
-    onAction();
-  }
-
-  const statusColor =
-    booking.payment_status === 'PAID' ? 'green' :
-    booking.payment_status === 'FAILED' ? 'red' :
-    booking.payment_status === 'REFUNDED' ? 'slate' :
-    'amber';
-
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="font-semibold text-slate-900 text-sm">{booking.pickup_location} → {booking.drop_location}</p>
-        <Badge color={statusColor}>{PAYMENT_STATUS_LABELS[booking.payment_status] ?? booking.payment_status}</Badge>
-      </div>
-      <div className="space-y-1 text-xs">
-        <Row label="Fare" value={formatCurrency(fare)} />
-        <Row label="Commission (5% of 2nd half)" value={formatCurrency(commission)} color="text-error-600" />
-        <Row label="Method" value={booking.payment_method ?? '—'} />
-        {booking.payment_verified_at && (
-          <Row label="Verified" value={new Date(booking.payment_verified_at).toLocaleDateString('en-IN')} />
-        )}
-      </div>
-      {(booking.payment_status === 'MANUAL_PAYMENT' || booking.payment_status === 'PENDING') && (
-        <div className="flex gap-2 pt-2">
-          <Button variant="accent" size="sm" className="flex-1" onClick={() => verifyPayment('PAID')} disabled={busy}>
-            <CheckCircle2 className="w-4 h-4" /> Mark Paid
-          </Button>
-          <Button variant="danger" size="sm" className="flex-1" onClick={() => verifyPayment('FAILED')} disabled={busy}>
-            <XCircle className="w-4 h-4" /> Mark Failed
-          </Button>
-        </div>
-      )}
-    </div>
-  );
+function PaymentsTab({ bookings, profiles, onAction }: { bookings: Booking[]; profiles: Profile[]; onAction: () => void }) {
+  return <ManualPaymentAdmin bookings={bookings} profiles={profiles} onAction={onAction} />;
 }
 
 function DisputeRow({ dispute, onAction }: { dispute: Dispute; onAction: () => void }) {

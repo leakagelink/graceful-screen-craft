@@ -36,7 +36,9 @@ export default function ManualPaymentPanel({ bookingId, amount, paymentStatus }:
     if (methodError || requestError) setError(methodError?.message || requestError?.message || 'Payment details could not be loaded.');
     const rows = ((methodData ?? []) as ManualPaymentMethod[]).sort((a, b) => methodOrder.indexOf(a.key) - methodOrder.indexOf(b.key));
     setMethods(rows);
-    setPaymentRequest(((requestData ?? [])[0] as ManualPaymentRequest | undefined) ?? null);
+    const latestRequest = ((requestData ?? [])[0] as ManualPaymentRequest | undefined) ?? null;
+    setPaymentRequest(latestRequest);
+    if (latestRequest?.status === 'approved' || latestRequest?.status === 'rejected') setNotice('');
     setLoading(false);
   }, [bookingId]);
 
@@ -52,7 +54,8 @@ export default function ManualPaymentPanel({ bookingId, amount, paymentStatus }:
   }, [bookingId, load]);
 
   useEffect(() => {
-    if (methods.length && !methods.some((method) => method.key === selectedKey)) setSelectedKey(methods[0].key);
+    const firstMethod = methods[0];
+    if (firstMethod && !methods.some((method) => method.key === selectedKey)) setSelectedKey(firstMethod.key);
   }, [methods, selectedKey]);
 
   const selectedMethod = useMemo(() => methods.find((method) => method.key === selectedKey) ?? null, [methods, selectedKey]);
@@ -123,7 +126,7 @@ export default function ManualPaymentPanel({ bookingId, amount, paymentStatus }:
       {requestStatus === 'pending' && (
         <div role="status" className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-2">
           <div className="flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-primary" /><p className="font-semibold text-sm">Admin verification pending</p><Badge color="amber">Pending</Badge></div>
-          <p className="text-xs text-muted-foreground">Request ID / UTR: <span className="font-semibold text-foreground break-all">{paymentRequest.transaction_reference}</span></p>
+          <p className="text-xs text-muted-foreground">Request ID / UTR: <span className="font-semibold text-foreground break-all">{paymentRequest?.transaction_reference}</span></p>
           <p className="text-xs text-muted-foreground">Admin confirm karte hi booking aur dashboard par payment status update ho jayega.</p>
         </div>
       )}
@@ -131,7 +134,7 @@ export default function ManualPaymentPanel({ bookingId, amount, paymentStatus }:
       {requestStatus === 'rejected' && !isPaid && (
         <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 flex items-start gap-3">
           <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-          <div><p className="font-semibold text-sm text-destructive">Payment request rejected</p><p className="text-xs text-muted-foreground mt-1">{paymentRequest.admin_note || 'Transaction reference check karke dobara submit karein.'}</p></div>
+          <div><p className="font-semibold text-sm text-destructive">Payment request rejected</p><p className="text-xs text-muted-foreground mt-1">{paymentRequest?.admin_note || 'Transaction reference check karke dobara submit karein.'}</p></div>
         </div>
       )}
 
@@ -163,7 +166,7 @@ export default function ManualPaymentPanel({ bookingId, amount, paymentStatus }:
                     <>
                       <DetailRow label="Payee" value={selectedMethod.payee_name || 'Vahakam'} />
                       <DetailRow label="UPI ID" value={selectedMethod.upi_id || '—'} onCopy={selectedMethod.upi_id ? () => copy(selectedMethod.upi_id!, 'UPI ID') : undefined} copied={copied === 'UPI ID'} />
-                      {upiUri && <Button asChild className="w-full"><a href={upiUri}><Smartphone />Open UPI app · {formatCurrency(amount)}</a></Button>}
+                      {upiUri && <a href={upiUri} className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold"><Smartphone className="w-4 h-4" />Open UPI app · {formatCurrency(amount)}</a>}
                     </>
                   )}
 
@@ -204,6 +207,6 @@ export default function ManualPaymentPanel({ bookingId, amount, paymentStatus }:
   );
 }
 
-function DetailRow({ label, value, onCopy, copied }: { label: string; value: string; onCopy?: () => void; copied?: boolean }) {
+function DetailRow({ label, value, onCopy, copied }: { label: string; value: string; onCopy?: (() => void) | undefined; copied?: boolean | undefined }) {
   return <div className="flex items-center justify-between gap-3 text-sm"><span className="text-muted-foreground">{label}</span><span className="font-semibold text-right break-all">{value}</span>{onCopy && <button type="button" onClick={onCopy} className="shrink-0 inline-flex items-center gap-1 text-xs text-primary font-semibold" aria-label={`Copy ${label}`}><Copy className="w-3.5 h-3.5" />{copied ? 'Copied' : 'Copy'}</button>}</div>;
 }

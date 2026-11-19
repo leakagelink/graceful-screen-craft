@@ -29,7 +29,7 @@ import { Button, Badge, Field, inputClass } from '@/components/ui';
 import { STATUS_META } from '@/components/BookingCard';
 import { RatingModal } from '@/components/RatingModal';
 import CancelReasonSheet from '@/components/CancelReasonSheet';
-import MockPaymentPanel from '@/components/MockPaymentPanel';
+import ManualPaymentPanel from '@/components/ManualPaymentPanel';
 
 interface OfferWithDriver extends Offer {
   driver_name?: string;
@@ -315,7 +315,7 @@ export default function ShipperTripDetail({ booking: initialBooking, onBack, onC
           </div>
         )}
 
-        <MockPaymentPanel bookingId={booking.id} amount={finalFare} />
+        <ManualPaymentPanel bookingId={booking.id} amount={finalFare} paymentStatus={booking.payment_status} />
 
         {/* --- ASSIGNED: trip progress + chat --- */}
         {hasDriver && (
