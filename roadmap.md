@@ -1,4 +1,11 @@
-# Current request — Driver profile ratings and reviews
+# Current request — In-app Back navigation
+
+- [ ] Keep browser and Android Back inside the app and restore the previous shipper/driver screen or tab.
+- [ ] Return chat to its trip, trip details to its originating tab, and KYC to its originating screen.
+- [ ] Require explicit confirmation before exiting from the Android home screen.
+- [ ] Add regression tests and verify desktop/phone browser Back plus simulated native Back; real-device verification remains separate.
+
+# Completed — Driver profile ratings and reviews
 
 - [x] Add a persistent Rate & review action to the assigned driver's profile after trip completion.
 - [x] Show the driver's average rating, total ratings and recent written reviews to trip participants and on the driver's own account.
