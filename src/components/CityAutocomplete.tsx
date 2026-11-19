@@ -14,7 +14,7 @@ interface Props {
 }
 
 function baseName(name: string) {
-  return name.split(',')[0].trim().toLowerCase();
+  return name.split(',')[0]?.trim().toLowerCase() ?? '';
 }
 
 function isExcluded(name: string, excludeName?: string) {
@@ -145,7 +145,8 @@ export default function CityAutocomplete({
       setHighlight((current) => Math.max(current - 1, 0));
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (results.length) pick(results[Math.min(highlight, results.length - 1)]);
+      const selected = results[Math.min(highlight, results.length - 1)];
+      if (selected) pick(selected);
       else void runRemoteSearch();
     }
   }

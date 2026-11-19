@@ -47,7 +47,7 @@ describe('All-India location search', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(geocode('Delhi')).resolves.toEqual({ lat: 28.6139, lng: 77.209 });
-    const url = String(fetchMock.mock.calls[0][0]);
+    const url = String(fetchMock.mock.calls[0]?.[0] ?? '');
     expect(url).toContain('countrycodes=in');
     expect(url).toContain('q=Delhi');
     expect(url).not.toContain('Maharashtra');

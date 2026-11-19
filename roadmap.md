@@ -37,7 +37,7 @@
 
 # Phase 5 — Final testing and publishing
 
-- [ ] Add all-India pickup/drop place search with selected coordinates and verify Delhi, Bhopal and Banaras routing.
+- [x] Add all-India pickup/drop place search with selected coordinates and verify Delhi, Bhopal and Banaras routing.
 - [x] Upgrade the location picker to a Rapido/Porter-style keyless vector map and verify pin, search, zoom and GPS flows on mobile.
 - [x] Run all existing regression tests and inspect content-page metadata.
 - [x] Re-run all 18 tests after mock-payment changes; verify public desktop/mobile account selection and consent-gated sign-in with no browser runtime errors.
