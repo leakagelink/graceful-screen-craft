@@ -47,7 +47,8 @@ export default function DriverShell({ tab, onTab, onTrip, onKyc, onChat }: { tab
     try { await downloadDeliveryReceipt(id); } catch (e) { setError(e instanceof Error ? e.message : 'Could not download receipt'); } finally { setDownloading(null); }
   }
   const mine = bookings.filter(b => b.driver_id === profile?.id);
-  const available = bookings.filter(b => ['available', 'paid', 'offer_made'].includes(b.status));
+  const isOnline = profile?.is_online === true;
+  const available = isOnline ? bookings.filter(b => ['available', 'paid', 'offer_made'].includes(b.status)) : [];
   const summary = driverEarnings(mine);
   const source = tab === 'loads' ? available : mine;
   const shown = source.filter(b => `${b.pickup_location} ${b.drop_location} ${b.material_type}`.toLowerCase().includes(search.toLowerCase())).filter(b => {
@@ -66,7 +67,8 @@ export default function DriverShell({ tab, onTab, onTrip, onKyc, onChat }: { tab
         {tab === 'loads' && <div className="space-y-2"><Button variant="outline" onClick={locate} disabled={locating}><Navigation />{locating ? 'Locating…' : coords ? 'Update location' : 'Nearby loads'}</Button><div className="flex gap-1">{['all', '10', '25', '50'].map(value => <Button key={value} size="sm" variant={filter === value ? 'default' : 'ghost'} disabled={value !== 'all' && !coords} onClick={() => setFilter(value)}>{value === 'all' ? 'All' : `${value} km`}</Button>)}</div></div>}
         {tab === 'trips' && <div className="flex flex-wrap gap-1">{['all', 'active', 'completed', 'cancelled'].map(value => <Button key={value} size="sm" variant={filter === value ? 'default' : 'ghost'} onClick={() => setFilter(value)} className="capitalize">{value}</Button>)}</div>}
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-        {loading ? <div className="py-12 flex justify-center"><Spinner className="size-6" /></div> : shown.length === 0 ? <p className="py-12 text-center text-muted-foreground">{tab === 'loads' ? 'No matching loads' : 'No trips yet'}</p> : shown.map(b => {
+        {tab === 'loads' && !isOnline && <p role="status" className="rounded-lg border border-border bg-muted p-4 text-sm">You are offline. Go online from the Home tab to see and accept new loads. Your active trips are unaffected.</p>}
+        {loading ? <div className="py-12 flex justify-center"><Spinner className="size-6" /></div> : shown.length === 0 ? <p className="py-12 text-center text-muted-foreground">{tab === 'loads' ? isOnline ? 'No matching loads' : 'New loads are hidden while you are offline' : 'No trips yet'}</p> : shown.map(b => {
           const last = messages.find(m => m.booking_id === b.id);
           const distance = pickupDistance(b, coords);
           return <article key={b.id} className="border border-border rounded-lg bg-card p-4 space-y-3">

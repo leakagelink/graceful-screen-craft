@@ -57,6 +57,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
   const isAssigned = booking.driver_id === profile?.id;
   const isMyTrip = isAssigned && !['available', 'paid', 'offer_made'].includes(booking.status);
   const isActiveTrip = isMyTrip && ['assigned', 'in_progress', 'otp_sent', 'delivered'].includes(booking.status);
+  const canAcceptNewLoad = profile?.is_online === true;
 
   // --- Driver live location tracking ---
   // Starts when trip is active, stops when trip completes/cancels
@@ -281,7 +282,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
               </p>
             )}
             {myOfferRow.status === 'countered' && (
-              <Button className="w-full mt-3" disabled={busy} onClick={() => runAction('accept_counter', { offerId: myOfferRow.id }, 'Counter accepted. Trip assigned.')}>Accept Counter</Button>
+              <Button className="w-full mt-3" disabled={busy || !canAcceptNewLoad} title={!canAcceptNewLoad ? 'Go online to accept this counter offer' : undefined} onClick={() => runAction('accept_counter', { offerId: myOfferRow.id }, 'Counter accepted. Trip assigned.')}>Accept Counter</Button>
             )}
           </div>
         )}
@@ -299,7 +300,12 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
         )}
 
         {/* --- ACTION BUTTONS (available loads) --- */}
-        {!isMyTrip && !isAssigned && ['available', 'paid', 'offer_made'].includes(booking.status) && !showOfferForm && (
+        {!isMyTrip && !isAssigned && ['available', 'paid', 'offer_made'].includes(booking.status) && !showOfferForm && !canAcceptNewLoad && (
+          <div role="status" className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            You are offline. Go online from the driver Home screen to accept or offer on this load.
+          </div>
+        )}
+        {!isMyTrip && !isAssigned && ['available', 'paid', 'offer_made'].includes(booking.status) && !showOfferForm && canAcceptNewLoad && (
           <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3 animate-fade-in-up">
             <div className="grid grid-cols-2 gap-3">
               <Button variant="primary" size="lg" onClick={acceptOffer} disabled={busy} loading={busy}>
@@ -316,7 +322,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
         )}
 
         {/* Make offer form */}
-        {showOfferForm && !isAssigned && (
+        {showOfferForm && !isAssigned && canAcceptNewLoad && (
           <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 animate-scale-in">
             <div>
               <h3 className="font-bold text-slate-900 text-sm mb-1">Make your offer</h3>

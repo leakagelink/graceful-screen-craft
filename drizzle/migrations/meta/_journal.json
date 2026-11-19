@@ -64,6 +64,13 @@
       "when": 1795086590356,
       "tag": "0008_manual_payment_workflow",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795089319660,
+      "tag": "0009_enforce_driver_availability",
+      "breakpoints": true
     }
   ]
 }

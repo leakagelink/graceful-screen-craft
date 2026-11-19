@@ -21,17 +21,18 @@ interface Props {
 type Tab = 'available' | 'mine' | 'return';
 
 export default function DriverDashboard({ onOpenBooking, onOpenKyc }: Props) {
-  const { profile, signOut, loadProfile } = useAuth();
+  const { profile, signOut, refreshProfile } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>('available');
   const [showBankModal, setShowBankModal] = useState(false);
-  const [reloadProfile, setReloadProfile] = useState(false);
   const [copied, setCopied] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'fare_high' | 'fare_low' | 'distance'>('newest');
   const [showSort, setShowSort] = useState(false);
   const [onlineToggling, setOnlineToggling] = useState(false);
+  const [onlineError, setOnlineError] = useState('');
+  const isOnline = profile?.is_online === true;
 
   const isFreeTrial =
     profile?.free_until && new Date(profile.free_until) >= new Date();
@@ -60,15 +61,9 @@ export default function DriverDashboard({ onOpenBooking, onOpenKyc }: Props) {
     load();
   }, [load]);
 
-  useEffect(() => {
-    if (reloadProfile && profile?.id) {
-      loadProfile(profile.id);
-    }
-  }, [reloadProfile, profile?.id, loadProfile]);
-
-  const available = bookings.filter((b) =>
+  const available = isOnline ? bookings.filter((b) =>
     ['available', 'paid', 'offer_made'].includes(b.status)
-  );
+  ) : [];
   const mine = bookings.filter(
     (b) => b.driver_id === profile?.id && !['available', 'paid', 'offer_made'].includes(b.status)
   );
@@ -114,11 +109,30 @@ export default function DriverDashboard({ onOpenBooking, onOpenKyc }: Props) {
   );
 
   async function toggleOnline() {
-    if (!profile?.id) return;
+    if (!profile?.id || onlineToggling) return;
+    const nextOnline = !isOnline;
     setOnlineToggling(true);
-    await supabase.from('profiles').update({ is_online: !profile.is_online }).eq('id', profile.id);
-    await loadProfile(profile.id);
-    setOnlineToggling(false);
+    setOnlineError('');
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ is_online: nextOnline })
+        .eq('id', profile.id)
+        .select('is_online')
+        .single();
+      if (error) throw error;
+      if (data?.is_online !== nextOnline) throw new Error('Availability could not be saved. Please try again.');
+      await refreshProfile();
+    } catch (error) {
+      const message = error instanceof Error
+        ? error.message
+        : typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string'
+          ? error.message
+          : 'Availability could not be saved. Please try again.';
+      setOnlineError(message);
+    } finally {
+      setOnlineToggling(false);
+    }
   }
 
   return (
@@ -182,23 +196,30 @@ export default function DriverDashboard({ onOpenBooking, onOpenKyc }: Props) {
 
           {/* Online/Offline toggle */}
           {profile?.role === 'driver' && (
-            <div className="mt-3 flex items-center gap-3 bg-white/10 backdrop-blur rounded-xl p-3">
-              <Power className={`w-5 h-5 ${profile.is_online ? 'text-accent-300' : 'text-slate-300'}`} />
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-white">
-                  {profile.is_online ? 'You are online' : 'You are offline'}
-                </p>
-                <p className="text-xs text-primary-200">
-                  {profile.is_online ? 'Visible to shippers, receiving loads' : 'Go online to see and accept loads'}
-                </p>
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-3 bg-white/10 backdrop-blur rounded-xl p-3">
+                <Power className={`w-5 h-5 ${isOnline ? 'text-accent-300' : 'text-slate-300'}`} />
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-white">
+                    {onlineToggling ? 'Saving availability…' : isOnline ? 'You are online' : 'You are offline'}
+                  </p>
+                  <p className="text-xs text-primary-200">
+                    {isOnline ? 'Visible to shippers, receiving loads' : 'Go online to see and accept loads'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-label="Driver availability"
+                  aria-checked={isOnline}
+                  onClick={toggleOnline}
+                  disabled={onlineToggling}
+                  className={`relative w-12 h-6 rounded-full transition-colors disabled:cursor-wait disabled:opacity-60 ${isOnline ? 'bg-accent-500' : 'bg-slate-600'}`}
+                >
+                  <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${isOnline ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                </button>
               </div>
-              <button
-                onClick={toggleOnline}
-                disabled={onlineToggling}
-                className={`relative w-12 h-6 rounded-full transition-colors ${profile.is_online ? 'bg-accent-500' : 'bg-slate-600'}`}
-              >
-                <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${profile.is_online ? 'translate-x-6' : 'translate-x-0.5'}`} />
-              </button>
+              {onlineError && <p role="alert" className="rounded-lg bg-error-500/15 px-3 py-2 text-xs text-error-100">{onlineError}</p>}
             </div>
           )}
 
@@ -344,14 +365,14 @@ export default function DriverDashboard({ onOpenBooking, onOpenKyc }: Props) {
             </div>
             <p className="font-semibold text-slate-700">
               {tab === 'available'
-                ? 'No loads available right now'
+                ? isOnline ? 'No loads available right now' : 'Loads are paused while you are offline'
                 : tab === 'mine'
                 ? 'No trips assigned to you yet'
                 : 'No return loads found'}
             </p>
             <p className="text-sm text-slate-400 mt-1">
               {tab === 'available'
-                ? 'Check back soon — new loads appear here automatically.'
+                ? isOnline ? 'Check back soon — new loads appear here automatically.' : 'Use the availability switch above to go online. Your active trips remain available in My Trips.'
                 : tab === 'mine'
                 ? 'Accept a load from the Available tab to get started.'
                 : 'Return loads match your completed trips drop locations. Complete more trips to see backhaul opportunities.'}
@@ -375,7 +396,7 @@ export default function DriverDashboard({ onOpenBooking, onOpenKyc }: Props) {
           onClose={() => setShowBankModal(false)}
           onSaved={() => {
             setShowBankModal(false);
-            setReloadProfile((r) => !r);
+            void refreshProfile();
           }}
         />
       )}
