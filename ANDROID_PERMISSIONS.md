@@ -3,9 +3,11 @@
 After pulling this update, install dependencies and sync Capacitor before rebuilding the APK:
 
 ```powershell
+git pull
 npm install
 npm run build
 npx cap sync android
+npx cap open android
 ```
 
 In `android/app/src/main/AndroidManifest.xml`, keep these entries directly inside `<manifest>` and before `<application>` (do not duplicate existing entries):

@@ -12,6 +12,7 @@ const nativeMocks = vi.hoisted(() => ({
   watchPosition: vi.fn(),
   clearWatch: vi.fn(),
   checkPermissions: vi.fn(),
+  then: undefined as undefined | (() => void),
 }));
 
 vi.mock('@capacitor/core', () => ({ Capacitor: { isNativePlatform: nativeMocks.isNativePlatform } }));
@@ -21,6 +22,7 @@ describe('Device location', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     nativeMocks.isNativePlatform.mockReturnValue(false);
+    nativeMocks.then = undefined;
   });
 
   afterEach(() => {
@@ -40,6 +42,18 @@ describe('Device location', () => {
       enableLocationFallback: true,
       timeout: 6666,
     }));
+  });
+
+  it('never treats the native Android plugin proxy as a Promise', async () => {
+    nativeMocks.isNativePlatform.mockReturnValue(true);
+    nativeMocks.getCurrentPosition.mockResolvedValue({ coords: { latitude: 23.2599, longitude: 77.4126 } });
+    const then = vi.fn(() => { throw new Error('Geolocation.then() is not implemented'); });
+    nativeMocks.then = then;
+
+    const position = await getCurrentDevicePosition();
+
+    expect(position.coords.latitude).toBe(23.2599);
+    expect(then).not.toHaveBeenCalled();
   });
 
   it('retries with precise GPS when the fast Android fix is unavailable', async () => {

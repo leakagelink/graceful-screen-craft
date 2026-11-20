@@ -24,7 +24,9 @@ async function nativeGeolocation() {
     import('@capacitor/core'),
     import('@capacitor/geolocation'),
   ]);
-  return Capacitor.isNativePlatform() ? Geolocation : null;
+  // Capacitor exposes native plugins as Proxies. Returning one directly from an
+  // async function makes Promise resolution call its nonexistent `.then()` method.
+  return { plugin: Capacitor.isNativePlatform() ? Geolocation : null };
 }
 
 function browserPosition(options: PositionOptions): Promise<DevicePosition> {
@@ -83,7 +85,7 @@ export async function getCurrentDevicePosition(options: PositionOptions = {}): P
   };
   const timeout = resolvedOptions.timeout ?? 20000;
   try {
-    const native = await nativeGeolocation();
+    const { plugin: native } = await nativeGeolocation();
     if (!native) return await withLocationTimeout(browserPosition(resolvedOptions), timeout + 1000);
 
     if (resolvedOptions.enableHighAccuracy === false) {
@@ -113,7 +115,7 @@ export async function getCurrentDevicePosition(options: PositionOptions = {}): P
 
 export async function getDeviceLocationPermission(): Promise<DeviceLocationPermission> {
   try {
-    const native = await nativeGeolocation();
+    const { plugin: native } = await nativeGeolocation();
     if (native) {
       const status = await native.checkPermissions();
       if (status.location === 'granted' || status.coarseLocation === 'granted') return 'granted';
@@ -140,7 +142,7 @@ export async function watchDevicePosition(
     ...options,
   };
   const timeout = resolvedOptions.timeout ?? 30000;
-  const native = await nativeGeolocation();
+  const { plugin: native } = await nativeGeolocation();
   if (!native && !navigator.geolocation) throw new DeviceLocationError('unsupported');
 
   let startupTimer: ReturnType<typeof setTimeout> | undefined;

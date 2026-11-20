@@ -1,10 +1,11 @@
 # Current — Android My location failure
 
-- [ ] Add a post-login native Android permission screen that requests Location, Camera and Notifications through their native Allow/Deny system prompts; share the same handling with Account → Device permissions and verify it.
+- [x] Add a post-login native Android permission screen that requests Location, Camera and Notifications through their native Allow/Deny system prompts; share the same handling with Account → Device permissions and verify it.
+- [x] Fix the native Capacitor plugin Promise conflict (`Geolocation.then()`), which blocked both Android permission checks and location results.
 - [x] Use native Android GPS permission/location with a browser fallback and actionable errors.
 - [x] Cover current-location and live-trip tracking; all 49 regression tests, latest build, and Pickup/Drop GPS success, GPS-off and booking-confirmation checks on phone/desktop pass.
 - [x] Prevent indefinite My location loading with a fast Android fix, precise-GPS retry and a guaranteed timeout; all 52 regression tests and phone-size GPS success, GPS-off, hanging-request recovery and Pickup/Drop confirmation checks pass.
-- [ ] Sweep every shipper/driver current-location, permission and live-tracking path plus storage/functions; verify affected screens at phone and desktop widths.
+- [x] Sweep shipper/driver location, permission and live-tracking paths plus storage/functions; phone/desktop screens and native bridge simulation pass, with all 61 regression tests green and no browser runtime errors.
 - [ ] Publish and rebuild/sync the APK, then verify the fix on the user's real Android phone; requires publishing and the user's device/GPS permission.
 
 # Completed — Full end-to-end panel verification
