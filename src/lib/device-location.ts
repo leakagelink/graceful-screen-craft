@@ -139,28 +139,53 @@ export async function watchDevicePosition(
     enableLocationFallback: true,
     ...options,
   };
+  const timeout = resolvedOptions.timeout ?? 30000;
   const native = await nativeGeolocation();
+  if (!native && !navigator.geolocation) throw new DeviceLocationError('unsupported');
+
+  let startupTimer: ReturnType<typeof setTimeout> | undefined;
+  const clearStartupTimer = () => {
+    if (startupTimer !== undefined) clearTimeout(startupTimer);
+    startupTimer = undefined;
+  };
+  const handlePosition = (position: DevicePosition) => {
+    clearStartupTimer();
+    onPosition(position);
+  };
+  const handleError = (error: unknown) => {
+    clearStartupTimer();
+    onError(error instanceof DeviceLocationError
+      ? error
+      : new DeviceLocationError(getDeviceLocationErrorKind(error), error instanceof Error ? error.message : undefined));
+  };
+  startupTimer = setTimeout(() => handleError(new DeviceLocationError('timeout')), timeout + 1000);
 
   if (native) {
-    let disposed = false;
     let watchId: string | null = null;
-    const id = await native.watchPosition(resolvedOptions, (position, error) => {
-      if (position) onPosition(position);
-      else onError(new DeviceLocationError(getDeviceLocationErrorKind(error)));
-    });
-    if (disposed) await native.clearWatch({ id });
-    else watchId = id;
+    try {
+      const id = await withLocationTimeout(native.watchPosition(resolvedOptions, (position, error) => {
+        if (position) handlePosition(position);
+        else handleError(error);
+      }), timeout + 1000);
+      watchId = id;
+    } catch (error) {
+      clearStartupTimer();
+      throw new DeviceLocationError(getDeviceLocationErrorKind(error), error instanceof Error ? error.message : undefined);
+    }
     return async () => {
-      disposed = true;
-      if (watchId) await native.clearWatch({ id: watchId });
+      clearStartupTimer();
+      if (watchId !== null) await native.clearWatch({ id: watchId });
     };
   }
 
-  if (!navigator.geolocation) throw new DeviceLocationError('unsupported');
-  const id = navigator.geolocation.watchPosition(
-    onPosition,
-    (error) => onError(new DeviceLocationError(getDeviceLocationErrorKind(error), error.message)),
-    resolvedOptions,
-  );
-  return async () => navigator.geolocation.clearWatch(id);
+  try {
+    const id = navigator.geolocation.watchPosition(handlePosition, handleError, resolvedOptions);
+    return async () => {
+      clearStartupTimer();
+      navigator.geolocation.clearWatch(id);
+    };
+  } catch (error) {
+    clearStartupTimer();
+    throw new DeviceLocationError(getDeviceLocationErrorKind(error), error instanceof Error ? error.message : undefined);
+  }
 }

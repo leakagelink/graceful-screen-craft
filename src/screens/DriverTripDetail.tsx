@@ -32,7 +32,7 @@ import TripConditions from '@/components/TripConditions';
 import TripPaymentPanel from '@/components/TripPaymentPanel';
 import DeliveryProofPanel from '@/components/DeliveryProofPanel';
 import { downloadDeliveryReceipt } from '@/lib/delivery-receipt';
-import { watchDevicePosition } from '@/lib/device-location';
+import { getDeviceLocationErrorMessage, watchDevicePosition } from '@/lib/device-location';
 
 import { actOnTrip } from '@/lib/trips';
 

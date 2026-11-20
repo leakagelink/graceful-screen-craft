@@ -100,6 +100,37 @@ describe('Device location', () => {
     expect(getDeviceLocationErrorMessage(error)).toContain(instruction);
   });
 
+  it('reports a live-location startup timeout and recovers when a position arrives', async () => {
+    vi.useFakeTimers();
+    nativeMocks.isNativePlatform.mockReturnValue(true);
+    let callback: ((position?: unknown, error?: unknown) => void) | undefined;
+    nativeMocks.watchPosition.mockImplementation((_options, handler) => {
+      callback = handler;
+      return Promise.resolve('trip-watch');
+    });
+    const onPosition = vi.fn();
+    const onError = vi.fn();
+
+    const stop = await watchDevicePosition(onPosition, onError, { timeout: 100 });
+    await vi.advanceTimersByTimeAsync(1101);
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ kind: 'timeout' }));
+
+    callback?.({ coords: { latitude: 23.2599, longitude: 77.4126 } });
+    expect(onPosition).toHaveBeenCalledOnce();
+    await stop();
+  });
+
+  it('rejects when native live-location setup never settles', async () => {
+    vi.useFakeTimers();
+    nativeMocks.isNativePlatform.mockReturnValue(true);
+    nativeMocks.watchPosition.mockReturnValue(new Promise(() => {}));
+
+    const result = watchDevicePosition(vi.fn(), vi.fn(), { timeout: 100 }).catch(error => error);
+    await vi.advanceTimersByTimeAsync(1101);
+
+    expect(await result).toMatchObject({ kind: 'timeout' });
+  });
+
   it('clears a native live-location watch during cleanup', async () => {
     nativeMocks.isNativePlatform.mockReturnValue(true);
     nativeMocks.watchPosition.mockResolvedValue('trip-watch');
