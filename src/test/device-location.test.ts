@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   getCurrentDevicePosition,
   getDeviceLocationErrorKind,
@@ -23,18 +23,60 @@ describe('Device location', () => {
     nativeMocks.isNativePlatform.mockReturnValue(false);
   });
 
-  it('uses native Android GPS with high accuracy and fallback enabled', async () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('tries a fast native Android location before requesting precise GPS', async () => {
     nativeMocks.isNativePlatform.mockReturnValue(true);
     nativeMocks.getCurrentPosition.mockResolvedValue({ coords: { latitude: 23.2599, longitude: 77.4126 } });
 
     const position = await getCurrentDevicePosition();
 
     expect(position.coords.latitude).toBe(23.2599);
+    expect(nativeMocks.getCurrentPosition).toHaveBeenCalledOnce();
     expect(nativeMocks.getCurrentPosition).toHaveBeenCalledWith(expect.objectContaining({
-      enableHighAccuracy: true,
+      enableHighAccuracy: false,
       enableLocationFallback: true,
+      timeout: 6666,
+    }));
+  });
+
+  it('retries with precise GPS when the fast Android fix is unavailable', async () => {
+    nativeMocks.isNativePlatform.mockReturnValue(true);
+    nativeMocks.getCurrentPosition
+      .mockRejectedValueOnce({ code: 2 })
+      .mockResolvedValueOnce({ coords: { latitude: 23.2599, longitude: 77.4126 } });
+
+    const position = await getCurrentDevicePosition();
+
+    expect(position.coords.longitude).toBe(77.4126);
+    expect(nativeMocks.getCurrentPosition).toHaveBeenCalledTimes(2);
+    expect(nativeMocks.getCurrentPosition).toHaveBeenLastCalledWith(expect.objectContaining({
+      enableHighAccuracy: true,
       timeout: 20000,
     }));
+  });
+
+  it('stops waiting when a native Android location request never settles', async () => {
+    vi.useFakeTimers();
+    nativeMocks.isNativePlatform.mockReturnValue(true);
+    nativeMocks.getCurrentPosition.mockReturnValue(new Promise(() => {}));
+
+    const result = getCurrentDevicePosition({ enableHighAccuracy: false, timeout: 100 }).catch(error => error);
+    await vi.advanceTimersByTimeAsync(1101);
+
+    const error = await result;
+    expect(error).toMatchObject({ kind: 'timeout' });
+    expect(getDeviceLocationErrorMessage(error)).toContain('open area');
+  });
+
+  it('does not retry GPS after Android location permission is denied', async () => {
+    nativeMocks.isNativePlatform.mockReturnValue(true);
+    nativeMocks.getCurrentPosition.mockRejectedValue({ code: 'OS-PLUG-GLOC-0003' });
+
+    await expect(getCurrentDevicePosition()).rejects.toMatchObject({ kind: 'denied' });
+    expect(nativeMocks.getCurrentPosition).toHaveBeenCalledOnce();
   });
 
   it('keeps browser geolocation working outside the Android app', async () => {

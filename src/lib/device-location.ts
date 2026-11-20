@@ -61,6 +61,18 @@ export function getDeviceLocationErrorMessage(error: unknown): string {
   }
 }
 
+async function withLocationTimeout<T>(request: Promise<T>, timeout: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new DeviceLocationError('timeout')), timeout);
+  });
+  try {
+    return await Promise.race([request, deadline]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
 export async function getCurrentDevicePosition(options: PositionOptions = {}): Promise<DevicePosition> {
   const resolvedOptions: PositionOptions = {
     enableHighAccuracy: true,
@@ -69,9 +81,31 @@ export async function getCurrentDevicePosition(options: PositionOptions = {}): P
     enableLocationFallback: true,
     ...options,
   };
+  const timeout = resolvedOptions.timeout ?? 20000;
   try {
     const native = await nativeGeolocation();
-    return native ? await native.getCurrentPosition(resolvedOptions) : await browserPosition(resolvedOptions);
+    if (!native) return await withLocationTimeout(browserPosition(resolvedOptions), timeout + 1000);
+
+    if (resolvedOptions.enableHighAccuracy === false) {
+      return await withLocationTimeout(native.getCurrentPosition(resolvedOptions), timeout + 1000);
+    }
+
+    return await withLocationTimeout((async () => {
+      // A balanced/network fix is normally immediate indoors. Some Android devices
+      // never settle a precise first request, so reserve time for a GPS retry.
+      const quickTimeout = Math.min(8000, Math.max(2000, Math.floor(timeout / 3)));
+      try {
+        return await withLocationTimeout(native.getCurrentPosition({
+          ...resolvedOptions,
+          enableHighAccuracy: false,
+          timeout: quickTimeout,
+        }), quickTimeout + 1000);
+      } catch (error) {
+        const kind = getDeviceLocationErrorKind(error);
+        if (kind === 'denied' || kind === 'disabled' || kind === 'unsupported') throw error;
+      }
+      return native.getCurrentPosition(resolvedOptions);
+    })(), timeout + 1000);
   } catch (error) {
     throw new DeviceLocationError(getDeviceLocationErrorKind(error), error instanceof Error ? error.message : undefined);
   }

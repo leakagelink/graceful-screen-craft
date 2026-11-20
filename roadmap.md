@@ -2,7 +2,8 @@
 
 - [x] Use native Android GPS permission/location with a browser fallback and actionable errors.
 - [x] Cover current-location and live-trip tracking; all 49 regression tests, latest build, and Pickup/Drop GPS success, GPS-off and booking-confirmation checks on phone/desktop pass.
-- [ ] Verify the rebuilt APK on the user's real Android phone; requires the user's device and GPS permission.
+- [x] Prevent indefinite My location loading with a fast Android fix, precise-GPS retry and a guaranteed timeout; all 52 regression tests and phone-size GPS success, GPS-off, hanging-request recovery and Pickup/Drop confirmation checks pass.
+- [ ] Publish and rebuild/sync the APK, then verify the fix on the user's real Android phone; requires publishing and the user's device/GPS permission.
 
 # Completed — Full end-to-end panel verification
 
