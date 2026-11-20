@@ -1,7 +1,7 @@
 # Current — Android My location failure
 
 - [x] Use native Android GPS permission/location with a browser fallback and actionable errors.
-- [x] Cover current-location and live-trip tracking; all 49 regression tests, latest build and phone-size success/GPS-off checks pass.
+- [x] Cover current-location and live-trip tracking; all 49 regression tests, latest build, and Pickup/Drop GPS success, GPS-off and booking-confirmation checks on phone/desktop pass.
 - [ ] Verify the rebuilt APK on the user's real Android phone; requires the user's device and GPS permission.
 
 # Completed — Full end-to-end panel verification
