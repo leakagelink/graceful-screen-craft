@@ -56,6 +56,7 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
   const [hasRated, setHasRated] = useState(false);
   const [shipperProfile, setShipperProfile] = useState<Profile | null>(null);
   const [tracking, setTracking] = useState(false);
+  const [trackingError, setTrackingError] = useState('');
   const [receiptBusy, setReceiptBusy] = useState(false);
   const ratingDismissedRef = useRef(false);
   const { settings } = useAppSettings();
@@ -70,13 +71,20 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
   useEffect(() => {
     if (!isActiveTrip) {
       setTracking(false);
+      setTrackingError('');
       return;
     }
 
     let cancelled = false;
     let stopWatching: (() => Promise<void>) | null = null;
+    setTrackingError('');
+    const trackingFailed = (error: unknown) => {
+      if (cancelled) return;
+      setTracking(false);
+      setTrackingError(getDeviceLocationErrorMessage(error));
+    };
     const updateLocation = async (lat: number, lng: number) => {
-      await supabase
+      return supabase
         .from('bookings')
         .update({
           driver_lat: lat,
@@ -90,15 +98,18 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
     void watchDevicePosition(
       (pos) => {
         if (cancelled) return;
-        setTracking(true);
-        void updateLocation(pos.coords.latitude, pos.coords.longitude);
+        void updateLocation(pos.coords.latitude, pos.coords.longitude).then(({ error }) => {
+          if (cancelled) return;
+          setTracking(!error);
+          setTrackingError(error ? 'Location could not be shared. Check your connection; the app will retry automatically.' : '');
+        });
       },
-      () => { if (!cancelled) setTracking(false); },
+      trackingFailed,
       { enableHighAccuracy: true, maximumAge: 10000, timeout: 30000, interval: 10000, minimumUpdateInterval: 5000 },
     ).then(stop => {
       if (cancelled) void stop();
       else stopWatching = stop;
-    }).catch(() => { if (!cancelled) setTracking(false); });
+    }).catch(trackingFailed);
 
     return () => {
       cancelled = true;
@@ -482,9 +493,9 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
 
             {/* Live location tracking indicator */}
             {isActiveTrip && (
-              <div className={`flex items-center gap-2 text-xs rounded-lg px-3 py-2 ${tracking ? 'bg-accent-50 text-accent-700' : 'bg-slate-100 text-slate-500'}`}>
-                <LocationIcon className={`w-3.5 h-3.5 ${tracking ? 'animate-pulse text-accent-600' : 'text-slate-400'}`} />
-                {tracking ? 'Sharing live location with shipper' : 'Location sharing inactive'}
+              <div role={trackingError ? 'alert' : 'status'} className={`flex items-center gap-2 text-xs rounded-lg px-3 py-2 ${tracking ? 'bg-accent-50 text-accent-700' : trackingError ? 'bg-destructive/10 text-destructive' : 'bg-muted text-muted-foreground'}`}>
+                <LocationIcon className={`w-3.5 h-3.5 shrink-0 ${tracking ? 'animate-pulse text-accent-600' : 'text-muted-foreground'}`} />
+                {tracking ? 'Sharing live location with shipper' : trackingError || 'Starting location sharing…'}
               </div>
             )}
 

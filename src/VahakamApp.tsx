@@ -18,6 +18,7 @@ import ShipperProfileSetup from '@/screens/ShipperProfileSetup';
 import type { ShipperTab } from '@/components/ShipperBottomNav';
 import type { Booking } from '@/lib/supabase';
 import { useAppBackNavigation } from '@/hooks/use-app-back-navigation';
+import NativePermissionGate from '@/components/NativePermissionGate';
 
 type ShipperView =
   | { name: 'dashboard' }
@@ -60,6 +61,9 @@ function AppRoutes() {
   const wrap = (screen: ReactNode) => (
     <>
       {screen}
+      {user && profile && !registrationRequired && profile.role !== 'admin' && (profile.role === 'driver' || profile.shipper_profile_completed) && (
+        <NativePermissionGate userId={user.id} />
+      )}
       {exitPrompt && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-primary-950/60 p-4 backdrop-blur-sm sm:items-center">
           <div role="alertdialog" aria-modal="true" aria-labelledby="exit-app-title" aria-describedby="exit-app-description" className="w-full max-w-sm rounded-3xl border border-border bg-card p-6 shadow-3d animate-scale-in">
