@@ -32,6 +32,7 @@ import TripConditions from '@/components/TripConditions';
 import TripPaymentPanel from '@/components/TripPaymentPanel';
 import DeliveryProofPanel from '@/components/DeliveryProofPanel';
 import { downloadDeliveryReceipt } from '@/lib/delivery-receipt';
+import { watchDevicePosition } from '@/lib/device-location';
 
 import { actOnTrip } from '@/lib/trips';
 
@@ -56,7 +57,6 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
   const [shipperProfile, setShipperProfile] = useState<Profile | null>(null);
   const [tracking, setTracking] = useState(false);
   const [receiptBusy, setReceiptBusy] = useState(false);
-  const watchIdRef = useRef<number | null>(null);
   const ratingDismissedRef = useRef(false);
   const { settings } = useAppSettings();
 
@@ -69,18 +69,12 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
   // Starts when trip is active, stops when trip completes/cancels
   useEffect(() => {
     if (!isActiveTrip) {
-      // Stop tracking if trip is no longer active
-      if (watchIdRef.current !== null) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
-        watchIdRef.current = null;
-      }
       setTracking(false);
       return;
     }
 
-    // Request permission and start watching position
-    if (!('geolocation' in navigator)) return;
-
+    let cancelled = false;
+    let stopWatching: (() => Promise<void>) | null = null;
     const updateLocation = async (lat: number, lng: number) => {
       await supabase
         .from('bookings')
@@ -93,21 +87,22 @@ export default function DriverTripDetail({ booking: initialBooking, onBack, onCh
         .eq('driver_id', profile?.id);
     };
 
-    const id = navigator.geolocation.watchPosition(
+    void watchDevicePosition(
       (pos) => {
+        if (cancelled) return;
         setTracking(true);
-        updateLocation(pos.coords.latitude, pos.coords.longitude);
+        void updateLocation(pos.coords.latitude, pos.coords.longitude);
       },
-      () => setTracking(false),
-      { enableHighAccuracy: true, maximumAge: 10000, timeout: 30000 }
-    );
-    watchIdRef.current = id;
+      () => { if (!cancelled) setTracking(false); },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 30000, interval: 10000, minimumUpdateInterval: 5000 },
+    ).then(stop => {
+      if (cancelled) void stop();
+      else stopWatching = stop;
+    }).catch(() => { if (!cancelled) setTracking(false); });
 
     return () => {
-      if (watchIdRef.current !== null) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
-        watchIdRef.current = null;
-      }
+      cancelled = true;
+      if (stopWatching) void stopWatching();
       setTracking(false);
     };
   }, [isActiveTrip, initialBooking.id, profile?.id]);

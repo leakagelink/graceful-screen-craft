@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { formatCurrency, getVehicle } from '@/lib/fare';
 import { driverEarnings, pickupDistance, type DriverBooking } from '@/lib/driver-data';
 import { downloadDeliveryReceipt } from '@/lib/delivery-receipt';
+import { getCurrentDevicePosition, getDeviceLocationErrorMessage } from '@/lib/device-location';
 import DriverDashboard from '@/screens/DriverDashboard';
 import DriverAccount from '@/screens/DriverAccount';
 import ShipperNotifications from '@/screens/ShipperNotifications';
@@ -38,9 +39,15 @@ export default function DriverShell({ tab, onTab, onTrip, onKyc, onChat }: { tab
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { setSearch(''); setFilter('all'); }, [tab]);
   async function locate() {
-    if (!navigator.geolocation) { setError('Location is unavailable on this device.'); return; }
     setLocating(true); setError('');
-    navigator.geolocation.getCurrentPosition(p => { setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }); setLocating(false); }, () => { setError('Location unavailable. Allow location in your browser to see nearby loads.'); setLocating(false); }, { timeout: 10000 });
+    try {
+      const position = await getCurrentDevicePosition();
+      setCoords({ lat: position.coords.latitude, lng: position.coords.longitude });
+    } catch (error) {
+      setError(getDeviceLocationErrorMessage(error));
+    } finally {
+      setLocating(false);
+    }
   }
   async function receipt(id: string) {
     setDownloading(id); setError('');

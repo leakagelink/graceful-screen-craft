@@ -5,6 +5,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { Check, Loader2, LocateFixed, MapPin, Minus, Plus, Search, X } from 'lucide-react';
 import { Button, inputClass } from '@/components/ui';
 import { reverseGeocode, searchPlaces, type LatLng, type PlaceResult } from '@/lib/routing';
+import { getCurrentDevicePosition, getDeviceLocationErrorMessage } from '@/lib/device-location';
 
 export interface PickedLocation {
   address: string;
@@ -154,30 +155,19 @@ export default function LocationPickerSheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapAttempt]);
 
-  function useCurrentLocation() {
+  async function useCurrentLocation() {
     setNotice(null);
-    if (!navigator.geolocation) {
-      setNotice('Location is not available on this device. Pick the spot on the map instead.');
-      return;
-    }
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setLocating(false);
-        const p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        placeRef.current?.(p);
-        mapRef.current?.flyTo([p.lat, p.lng], 17, { duration: 0.8 });
-      },
-      (err) => {
-        setLocating(false);
-        setNotice(
-          err.code === err.PERMISSION_DENIED
-            ? 'Location permission is off. Allow location for this app in your phone settings, or pick the spot on the map.'
-            : 'Could not read your location. Try again or pick the spot on the map.',
-        );
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
-    );
+    try {
+      const pos = await getCurrentDevicePosition({ timeout: 25000, maximumAge: 30000 });
+      const p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      placeRef.current?.(p);
+      mapRef.current?.flyTo([p.lat, p.lng], 17, { duration: 0.8 });
+    } catch (error) {
+      setNotice(getDeviceLocationErrorMessage(error));
+    } finally {
+      setLocating(false);
+    }
   }
 
   async function runSearch(e: FormEvent) {
